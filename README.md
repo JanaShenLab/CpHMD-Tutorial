@@ -10,4 +10,4 @@ Titratable Water. _J. Chem. Theory Comput._ 2016; 12(11):5411–5421. https://do
   - GBNeck2 implicit-solvent CpHMD in Amber: Huang Y, Harris RC, Shen J. Generalized Born Based Continuous Constant pH Molecular Dynamics in Amber: Implementation, Benchmarking and Analysis. _J. Chem. Inf. Model._ 2018;
 58(7):1372–1383. https://doi.org/10.1021/acs.jcim.8b00227
 
-## Codes for all examples in this repository: https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial
+## Codes for all examples in this tutorial: https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial
