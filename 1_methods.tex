@@ -1,0 +1,120 @@
+\subsection{The continuous constant pH molecular dynamics framework}
+
+In continuous CpHMD, each titratable residue is assigned a titration coordinate, $\lambda_i$ \cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.}. 
+We attribute to this coordinate an implicit function of an underlying coordinate $\theta_i$ such that $\lambda_i$ is bound between 0 and 1:
+\begin{equation}
+    \lambda_i = \sin^2\theta_i,
+\end{equation}
+where 0 and 1 represent the protonated and deprotonated states, respectively. 
+Since $\lambda$ continuously evolves between 0 and 1,
+in simulation analysis we apply cutoffs to define
+protonated ($\lambda^P < 0.2$) and deprotonated states ($\lambda^U > 0.8$). 
+Having the titration coordinate in place, we use an extended Hamiltonian to allow the simultaneous propagation of spatial (real) and titration (virtual) coordinates:
+
+\begin{equation}
+\begin{split}
+\label{eq:Hamiltonian}
+\mathcal{H}(\{\bm{r}_a\},\{\theta_i\})=
+&\frac{1}{2}\sum_am_a\dot{\bm{r}}_a^2+\frac{1}{2}\sum_im_i\dot{\theta}_i^2+U^{\rm int}(\{\bm{r}_a\})\\
+&+U^{\rm hybr}(\{\bm{r}_a\},\{\theta_i\})+\sum_iU^{\ast}(\theta_i),
+\end{split}
+\end{equation}
+where $\bm{r}_a$ refers to the (x,y,z) coordinates
+of atom $a$, and $\theta_i$ refers to the titration coordinate of titratable residue $i$. 
+The two first terms of Eq.~\ref{eq:Hamiltonian} give the kinetic energies of real atoms and virtual $\lambda$ particles. 
+$U^{\rm int}$ represent the titration-independent bonded and non-bond energies. 
+The fourth term, $U^{\rm hybr}$, describes the 
+non-bond energies, which are dependent on both spatial and titration coordinates. 
+For the particle-mesh Ewald (PME) all-atom CpHMD
+\cite{Huang_Shen_2016_J.Chem.TheoryComput.}
+$U^{\rm hybr}$ includes only Coulomb and van der Waals (vdW) energies, while for
+the implicit- and hybrid-solvent CpHMD methods $U^{\rm hybr}$ also includes the generalized Born (GB) energy:
+ 
+ \begin{equation}
+\label{eq:Uhybr}
+\begin{split}
+U^{\rm hybr}(\{\bm{r}_a\},\{\theta_i\})=U^{\rm elec}(\{\bm{r}_a\},\{\theta_i\}) 
++ U^{\rm vdW}(\{\bm{r}_a\},\{\theta_i\})\\
++ U^{\rm GB}(\{\bm{r}_a\},\{\theta_i\})
+\end{split}
+\end{equation}
+
+The dependence of the electrostatic energy on the titration coordinates arises from the requirement that
+the partial atomic charges on the titrating residue
+are linearly interpolated  
+between the values in the deprotonated and protonated states with respect to $\lambda$:
+
+% Thus, we can write the charge on atom $j$, $q_j$, on the titrating residue $i$ as
+%
+\begin{equation}
+q_j(\lambda_i) = (1-\lambda_i) q_j^{\rm prot} +  \lambda_i q_j^{\rm unprot},
+\label{eq:qlamb}
+\end{equation}
+where $q_j$ refers to the partial charge of an atom $j$ in the titrating residue $i$.
+As to vdW energies, the 
+interactions involving a titratable proton are linearly attenuated with respect to $\lambda$:
+\begin{equation}
+U^{\rm vdW}_{ij}(\bm r_i, \bm r_j, \lambda_i) = (1-\lambda_i)U^{\rm vdW\ast}_{ij}(\bm r_i, \bm r_j),
+\end{equation}
+where $i$ is the index for the titratable proton, $j$ is the index for all other atoms, and $U^{\rm vdW \ast}_{ij}$ refers to the protonation independent vdW interaction energy. If both $i$ and $j$ are titratable protons,
+the interaction is linearly attenuated by the $\lambda$ values of both:
+\begin{equation}
+U^{\rm vdW}_{ij}(\bm r_i, \bm r_j, \lambda_i, \lambda_j) = (1-\lambda_i)(1-\lambda_j)U^{\rm vdW\ast}_{ij}(\bm r_i, \bm r_j).
+\end{equation}
+Note, the vdW energy correction is small and typically neglected in constant pH methods except for the CpHMD methods implemented in CHARMM and Amber \cite{Khandogin_Brooks_2005_Biophys.J.,Wallace_Shen_2011_J.Chem.TheoryComput.,Huang_Shen_2016_J.Chem.TheoryComput.,Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}.
+
+Finally, the last term in Eq. \ref{eq:Hamiltonian} 
+only affects titratable groups and is consisted of 
+three biasing potentials:
+\begin{equation}
+\label{eq:biasingpotential}
+U^{\ast}(\theta_i)=-U^{\rm mod}(\lambda_i)+U^{\rm barr}(\lambda_i)+U^{\rm pH}(\lambda_i).
+\end{equation}
+
+The first biasing potential $U^{\rm mod}$ describes a potential of mean force (PMF) of model titration along the $\lambda$-coordinate, where the model represents a fully solvent-exposed amino acid, i.e., a blocked single amino acid or a small peptide in solution.
+According to the linear response theory, 
+model PMF is (in GB solvent) or can be approximated (in explicit solvent) as a quadratic function:
+\begin{equation}
+\label{eq:Umod_1d}
+U^{\rm mod}(\lambda_i)=A(\lambda_i-B)^2.
+\end{equation}
+Here $A$ and $B$ are parameters that can be determined through free energy calculation methods, such as thermodynamic integration (TI, see section Parameterization). 
+By analogy, in the case of coupled double-site titration \cite{Khandogin_Brooks_2005_Biophys.J.}, e.g., histidine or carboxylic acid, the model PMF is second order in both $\lambda$ and $x$, where 
+$x$ is a coordinate that represents the tautomer interconversion.
+The two-dimensional PMF can be written as a bivariate polynomial,
+%
+\begin{equation}
+\begin{split}
+U^{\rm mod}(\lambda_i,x_i) =
+&a_0 \lambda_i^2 x_i^2 + a_1 \lambda_i^2 x_i + a_2 \lambda_i x_i^2 + a_3 \lambda_i^2 \\
+&+ a_4 x_i^2 + a_5 \lambda_i x_i + a_6 \lambda_i + a_7 x_i + a_8.
+\end{split}
+\label{eq:double}
+\end{equation}
+Here $x_{i}=\sin^{2}\theta^{x}_{i}$ is bound between 0 and 1, where $\theta^{x}_{i}$ is the underlying unbound
+variable. 
+%
+
+$U^{\rm barr}$, the second biasing potential in Eq. \ref{eq:biasingpotential}, describes a barrier or penalty potential in the center of the titration coordinate, 
+%
+\begin{equation}
+U^{\rm barr}(\lambda_i) = -4\beta\left(\lambda_i - \frac{1}{2} \right)^2,
+\label{eq:Ubarr}
+\end{equation}
+where $\beta$ is a parameter that determines the height of the barrier. 
+Adding the barrier potential serves to
+increase the sampling time at the end-point states (e.g., $\lambda<0.2$ or $\lambda>0.8$) and therefore
+minimizing the unphysical vdW and electrostatic interactions associated with mixed state 
+(e.g., $0.2 \le \lambda \le 0.8$). 
+
+$U^{\rm pH}$, the last term of Eq.~\ref{eq:biasingpotential} 
+describes the pH dependence of the deprotonation free energy 
+and is given by
+%
+\begin{equation}
+U^{\rm pH}(\lambda_i)=ln(10)k_BT({\rm pH}-\textrm{p}{K_a}^{\rm mod})\lambda_i, 
+\label{eq:UpH}
+\end{equation}
+% 
+where $k_B$ is the Boltzmann constant, $T$ is the system temperature, and $\textrm{p}{K_a}^{\rm mod}$ is the model {\pka} for the titratable residue $i$.
+

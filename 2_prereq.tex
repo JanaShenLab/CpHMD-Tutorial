@@ -1,0 +1,133 @@
+\section{Prerequisites} % - Ruibin
+CpHMD is a specialized MD technique, so the user should have some familiarity with MD simulations and especially with the Amber or CHARMM packages. 
+Users with experience with other MD engines, such as Gromacs
+\cite{Abraham_Lindahl_2015_SoftwareX}, NAMD\cite{Phillips_Tajkhorshid_2020_J.Chem.Phys.}, 
+or OpenMM
+\cite{Eastman_Pande_2017_PLoSComput.Biol.} 
+are encouraged to go through the introductory tutorials for Amber or CHARMM to get started. 
+Before running a CpHMD simulation, it is important to know your research objective. 
+If the objective is to predict the {\pka} values of soluble proteins or their protonation states at a certain pH condition, GBNeck2-CpHMD 
+\cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}
+is the best choice and Amber \cite{Case_Kollman_2018_}
+experience is required. 
+If the objective is to investigate the detailed proton-coupled conformational dynamics, ion transfer, protein-ligand binding/unbinding,
+or transmembrane proteins, then 
+the hybrid-solvent CpHMD  \cite{Wallace_Shen_2011_J.Chem.TheoryComput.,Huang_Shen_2016_Nat.Commun.} 
+or the all-atom PME CpHMD \cite{Huang_Shen_2016_J.Chem.TheoryComput.}
+in CHARMM
+\cite{Brooks_Karplus_2009_J.Comput.Chem.}
+should be used.
+We note, a GPU-accelerated all-atom PME CpHMD 
+implementation in Amber is forthcoming (Harris, Liu, and Shen, to be published). 
+Like all computational chemistry calculations, it is important to know your system as much as possible before any serious simulations. 
+With such knowledge, we can decide what salt concentration, temperature, pH range, and titratable residue types to use in CpHMD. Also, the research objective dictates the simulation length. For example, to predict protonation states, simulation can be run until the unprotonated fractions at all pH are converged, typically 10-50 ns per replica. If however, a large conformational transition is of interest, the simulation should be much longer. 
+
+\subsection{Background knowledge}
+Knowledge of classical MD is required to understand what we can and cannot achieve through a MD simulation. 
+The user should also understand the parameters used in energy minimization, heating, equilibration, and production runs. 
+Of course, chemistry knowledge of pH, {\pka}, and protonation states and how they may impact the physical properties of the specific biological or material system is essential for obtaining meaningful results.
+
+CpHMD simulations are run on a workstation or high-performance computing (HPC) cluster under a Linux operating system. 
+The user is expected to have a good knowledge of Linux commands for accessing and editing files, submitting jobs to servers, and retrieving simulation result files. 
+Shell script and preferably also Python skills are required for pre- and post-processing files. 
+For simulations on a HPC cluster, the user is required to be familiar with the specific batch scheduler and queuing system, e.g., SLURM (Simple Linux Universal Resource Manager), SGE (Sun Grid Engine), or PBS (Portable Batch System). 
+The user is expected to know commands for submitting and checking the status of jobs.
+The user is also expected to set environmental variables required for the specific MD engine.
+Nowadays, a CpHMD job can also be performed on a workstation with a single or multiple GPUs. 
+In this case, the user is required to use commands such as `nvidia-smi' to check the GPU status and `nvcc --version' to check the CUDA version as well. 
+The user can use any data visualisation tool(s), but matplotlib in Python and Jupyter notebooks are recommended in our analysis tool set.  
+
+
+\subsection{Software/system requirements} 
+For GBNeck2-CpHMD, Amber16 is the minimum version. 
+Requirements for installing Amber can be found in the \href{https://ambermd.org/Installation.php}{Amber website}. 
+For the GPU version (pmemd.cuda), a Nvidia GPU card with at least compute compatibility sm3.0 should be installed with the latest driver. 
+CUDA 10.1 is the primary CUDA version for running it but early versions from CUDA 7.5 also works. 
+After successfully installing CUDA, it is important to set three environmental variables in Linux. 
+\textbf{CUDA\_HOME} and \textbf{LD\_LIBRARY\_PATH} must point to the directories where the desired CUDA version is installed. 
+We also need to specify \textbf{CUDA\_VISIBLE\_DEVICES} to GPU device indices. For example, 
+\begin{lstlisting}
+$ export CUDA_HOME=/usr/local/cuda-10.1
+$ export LD_LIBRARY_PATH=
+            /usr/local/cuda-10.1/lib64
+$ export CUDA_VISIBLE_DEVICES=0,1
+\end{lstlisting}
+These variables will direct the Linux system to use the CUDA 10.1 version installed in the /usr/local directory.
+In the example above two GPU cards are available,
+and the indices 0 and 1 for CUDA\_VISIBLE\_DEVICES indicate the first and second GPU to use, respectively. 
+Following installation of Amber, the user should set the environmental variable \textbf{AMBERHOME} to the Amber installation folder. 
+\begin{lstlisting}
+$ export AMBERHOME=/path_to_Amber_version_xx/
+\end{lstlisting}
+
+Before preparing CpHMD inputs of a protein system, 
+we need to clean up and fix problems in the PDB file,
+e.g., removing non-protein atoms, adding missing residues and atoms, and fixing non-canonical amino acid residues. 
+To do that, we can use the Perl script convpdb.pl in \href{http://blue11.bch.msu.edu/mmtsb/Main_Page}{mmtsb tool set} \cite{Feig_Brooks_2004_J.Mol.Graph.Model.} or \href{https://github.com/openmm/pdbfixer}{pdbfixer} in OpenMM \cite{Eastman_Pande_2017_PLoSComput.Biol.}. 
+For example, the following commands can be used 
+to fix the file 1vii.pdb downloaded from RCSB (\href{www.rcsb.org}{www.rcsb.org}) \cite{Berman_Bourne_2000_NucleicAcidsRes.}.  
+\begin{lstlisting}
+$ convpdb.pl -nohetero -fixcoo -renumber 1 -out
+amber -chain A -segname 1vii.pdb 
+\end{lstlisting}
+or 
+\begin{lstlisting}
+$ pdbfixer --add-atoms=heavy 
+--keep-heterogens=none --add-residues
+--replace-nonstandard 1vii.pdb
+\end{lstlisting}
+ Alternatively, we can use a homology modeling software such as \href{https://swissmodel.expasy.org/}{SWISS-MODEL} \cite{Waterhouse_Schwede_2018_NucleicAcidsRes.} to fix those problems especially when the number of continuously missing residues is large \cite{Waterhouse_Schwede_2018_NucleicAcidsRes.}.
+ 
+ The next step is to add capping ligands ACE and NH2 to the N- and C-terminus and to modify ASP, GLU and HIS to AS2, GL2, and HIP residues if these residue types are set as titratable. For AS2 and GL2, a library file \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/phmd.lib}{phmd.lib} and a force field modification file \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/frcmod.phmd}{frcmod.phmd} are included in Ambertools after version 19 \cite{Case_Kollman_2018_}, or we can load them to tLeap/Leap from the directory containing the two files. The last step is to use tLeap/Leap in Amber/ Ambertools to generate topology and parameter files. Our \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep}{cphmd-prep} tool set uses the pdbfixer tool for the first step and can do all the aforementioned steps to prepare GBNeck2-CpHMD compatible input files. 
+
+We use a Python-based \href{https://gitlab.com/shenlab-amber-cphmd/async_ph_replica_exchange}{asynchronous replica exchange} implementation for GPU pH replica-exchange simulations. 
+Scripts in \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-analysis}{cphmd-analysis} are used for analyzing CpHMD related files, including convergence checking, {\pka} calculation, and replica-exchange profiling. 
+Some simple trajectory based analysis such as RMSD can also be done, but the users can use any tools, e.g., CPPTRAJ \cite{Roe_Thomas_2013_J.Chem.TheoryComput.}, PTRAJ \cite{Roe_Thomas_2013_J.Chem.TheoryComput.}, VMD \cite{Humphrey_Schulten_1996_J.Mol.Graph.}, and MDAnalysis \cite{Michaud-Agrawal_Beckstein_2011_J.Comput.Chem.}. 
+% Note that these free tools usually depends on other free softwares, including OpenMM, Ambertools, scipy, pandas, matplotlib, etc. 
+% The instructions on how to install those software are covered in their individual pages and not discussed here. 
+
+A suggestion to use Python dependent packages is to use Anaconda or Miniconda. With them, the user can create a virtual environment specific for CpHMD related calculations. 
+For example, after installing Anaconda or Miniconda, we can type 
+\begin{lstlisting}[language=bash]
+$ conda create --name cphmd python=3.7
+\end{lstlisting}
+Note that we choose Python version 3.7 because the OpenMM package currently only supports up to Python 3.7. 
+Activate the environment named 'cphmd' by
+\begin{lstlisting}[language=bash]
+$ conda activate cphmd
+\end{lstlisting}
+Many packages can be installed through the conda and pip tool.
+\begin{lstlisting}[language=bash]
+$ conda install -c omnia pdbfixer parmed
+$ conda install -c conda-forge ambertools
+                 mdanalysis matplotlib 
+$ conda install -c anaconda numpy scipy pandas 
+$ pip install f90nml
+\end{lstlisting}
+Whenever the user wants to do some calculations or analysis related to CpHMD, they can activate this 'cphmd' virtual environment and use the installed tools without causing conflict with other software. 
+% Python Packages and Version required for Async-Replica Exchange 
+% Python Packages and Version required for the CpHMD-Analysis Lambda Parser
+
+For running the hybrid-solvent CpHMD \cite{Wallace_Shen_2011_J.Chem.TheoryComput.}
+in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.}
+you will need to follow the installation instructions in the \href{https://www.charmm.org/archive/charmm/documentation/installation/}{CHARMM documentation}.
+We suggest including the MPI and the Hamiltonian replica exchange options.
+\begin{lstlisting}[language=bash]
+ $ ./install.com gnu xxlarge M mpif90 +CMPI
+ +REPDSTR +ASYNC_PME +GENCOMM
+ \end{lstlisting}
+If you want to install CHARMM on a local workstation for building and preparing systems or for running a single pH simulation, you can use the following installation command.
+\begin{lstlisting}[language=bash]
+ $ ./install.com gnu xxlarge
+ \end{lstlisting}
+
+
+% \section{Content and links}
+
+% A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
+% You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
+
+% \section{Checklists}
+% Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
+% Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
+% One example is shown here.

@@ -1,0 +1,204 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LIVECOMS ARTICLE TEMPLATE FOR BEST PRACTICES GUIDE
+%%% ADAPTED FROM ELIFE ARTICLE TEMPLATE (8/10/2017)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PREAMBLE
+\documentclass[9pt,tutorial]{livecoms}
+% Use the 'onehalfspacing' option for 1.5 line spacing
+% Use the 'doublespacing' option for 2.0 line spacing
+% Use the 'lineno' option for adding line numbers.
+% Use the "ASAPversion' option following article acceptance to add the DOI and relevant dates to the document footer.
+% Use the 'pubversion' option for adding the citation and publication information to the document footer, when the LiveCoMS issue is finalized.
+% The 'bestpractices' option for indicates that this is a best practices guide.
+% Omit the bestpractices option to remove the marking as a LiveCoMS paper.
+% Please note that these options may affect formatting.
+
+\usepackage{lipsum} % Required to insert dummy text
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx,bm}
+\usepackage{hyperref} % Not original - Added by Jack
+\usepackage{listings} % Not original - Added by Jack
+\DeclareSIUnit\Molar{M}
+\usepackage[italic]{mathastext}
+\newcommand{\pka}{p\textit{K}$_{\rm a}$}
+\graphicspath{{figures/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% IMPORTANT USER CONFIGURATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\versionnumber}{1.0}  
+% you should update the minor version number in preprints and major version number of submissions.
+\newcommand{\githubrepository}{\url{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial}}  %this should be the main github repository for this article
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ARTICLE SETUP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{A Guide to the Continuous Constant pH Molecular Dynamics 
+Methods in Amber and CHARMM v[\versionnumber]}
+
+\author[1,\authfn{1},\authfn{2}]{Jack A. Henderson}
+\author[1,\authfn{1}]{Ruibin Liu}
+% \alsoaffiliation{
+% Joint first author
+% }
+\author[1,\authfn{3}]{Julie A. Harris}
+\author[1,\authfn{4}]{Yandong Huang}
+\author[1]{Vinicius M. de Oliveira}
+%\author[1]{Paween Mahinthichaichan}
+\author[1*]{Jana Shen}
+\affil[1]{University of Maryland School of Pharmacy, Baltimore, MD}
+%\affil[2]{Institution 2}
+
+\corr{jana.shen@rx.umaryland.edu}{JS}  % Correspondence emails.  FMS and FS are the appropriate authors initials.
+%\corr{email2@example.com}{FS}
+
+\orcid{Jack A. Henderson}{https://orcid.org/0000-0001-6675-7944}
+\orcid{Ruibin Liu}{https://orcid.org/0000-0001-8395-9353}
+\orcid{Julie A. Harris}{https://orcid.org/0000-0002-1130-6457}
+\orcid{Yandong Huang}{https://orcid.org/0000-0002-1452-6383}
+\orcid{Vinicius M. de Oliveira}{https://orcid.org/0000-0003-0927-3825}
+\orcid{Jana Shen}{https://orcid.org/0000-0002-3234-0769}
+
+\contrib[\authfn{1}]{These authors contributed equally to this work}
+% \contrib[\authfn{2}]{These authors also contributed equally to this work}
+
+\presentadd[\authfn{2}]{Scorpion Therapeutics, Boston, MA}
+\presentadd[\authfn{3}]{ComputChem LLC, Baltimore, MD}
+\presentadd[\authfn{4}]{Jimei University, College of Computer Engineering, Xiamen, China}
+% \presentadd[\authfn{4}]{Department, Institute, Country}
+
+\blurb{This LiveCoMS document is maintained online on GitLab at \githubrepository. To provide feedback, suggestions, or help improve it, please visit the GitLab repository and participate via the issue tracker.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PUBLICATION INFORMATION
+%%% Fill out these parameters when available
+%%% These are used when the "pubversion" option is invoked
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pubDOI{10.XXXX/YYYYYYY}
+\pubvolume{<volume>}
+\pubissue{<issue>}
+\pubyear{<year>}
+\articlenum{<number>}
+\datereceived{Day Month Year}
+\dateaccepted{Day Month Year}
+
+% \lstnewenvironment{listings}[1][] 
+%  {\lstset{frame=off,escapechar=`,breaklines, breakindent=10pt, breakatwhitespace=True, linewidth=3.4in, #1}}
+% {}
+
+\lstnewenvironment{plaincontent}[1][] 
+ {\lstset{frame=shadowbox,escapechar=`,breaklines, breakindent=10pt, breakatwhitespace=True, linewidth=3.4in, #1}}
+{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ARTICLE START
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{frontmatter}
+\maketitle
+
+\begin{abstract}
+%This particular document provides a skeleton illustrating key sections for a Tutorial document.
+%Please see the sample \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates} for additional information on and examples of using the LiveCoMS LaTeX class.
+%Here we also assume familiarity with LaTeX and knowledge of how to include figures, tables, etc.; if you want examples, see the sample just referenced.
+
+%In your work, in this particular slot, please provide an abstract of no more than 250 words.
+%Your abstract should explain the main contributions of your article, and should not contain any material that is not included in the main text.
+%Please note that your abstract, plus the authorship material following it, must not extend beyond the title page or modifications to the LaTeX class will likely be needed.
+
+% Begin Abstract Here
+Like temperature and pressure, solution pH is an important environmental variable in biomolecular simulations. 
+Virtually all proteins depend on pH to maintain their structure and function. 
+In conventional molecular dynamics (MD) simulations of proteins, pH is implicitly accounted for by assigning and fixing protonation states of titratable sidechains. This is a significant drawback, 
+as the assigned protonation states may be wrong and they may change during dynamics.
+In this tutorial, we guide the reader in learning and using the various continuous constant pH MD methods in Amber and CHARMM packages, which have been applied to predict {\pka} values and elucidate proton-coupled conformational dynamics of a variety of proteins including enzymes and membrane transporters.
+\end{abstract}
+
+\end{frontmatter}
+
+
+%Here you would explain what problem you are tackling and briefly motivate your work.
+
+
+%Keep in mind, as you prepare your manuscript, that you should plan for a representative image  which will be used to highlight your article on the journal website and publications. Usually, this would be one of your figures, but it must also be uploaded separately upon article submission. We give specific guidelines for this image on the journal website in the section on article submission (see \url{https://livecomsjournal.github.io/authors/policies/index.html#article-submission}).
+
+%Additionally, for well-formatted manuscripts, we recommend that you let LaTeX handle figure/table placement for you as much as possible, so please avoid specifying strenuous float instructions like `[h!]` and `[H]` as much as possible.
+
+
+
+
+
+\input{1_intro}
+\input{1_methods}
+\input{1_scope}
+\input{2_prereq}
+\input{3_hphmd}
+\input{4_aphmd}
+\input{5_gphmd}
+\input{6_analysis}
+\input{7_parameterization}
+
+\section{Author Contributions}
+%%%%%%%%%%%%%%%%
+% This section mustt describe the actual contributions of
+% author. Since this is an electronic-only journal, there is
+% no length limit when you describe the authors' contributions,
+% so we recommend describing what they actually did rather than
+% simply categorizing them in a small number of
+% predefined roles as might be done in other journals.
+%
+% See the policies ``Policies on Authorship'' section of https://livecoms.github.io
+% for more information on deciding on authorship and author order.
+%%%%%%%%%%%%%%%%
+Henderson, Liu, Harris, Huang, de Oliveira, and Shen
+together wrote the manuscript.
+We thank Zhi Yue and Paween Mahinthichaichan for contributing example scripts for the hybrid-solvent CpHMD simulations of transmembrane proteins.
+We thank Jason A. Wallace for a bash script to calculate {\pka} values and track the convergence of unprotonated fractions using Grace.
+% % We suggest you preserve this comment:
+% For a more detailed description of author contributions,
+% see the GitHub issue tracking and changelog at \githubrepository.
+
+%\section{Other Contributions}
+%%%%%%%%%%%%%%%
+% You should include all people who have filed issues that were
+% accepted into the paper, or that upon discussion altered what was in the paper.
+% Multiple significant contributions might mean that the contributor
+% should be moved to authorship at the discretion of the a
+%
+% See the policies ``Policies on Authorship'' section of https://livecoms.github.io for
+% more information on deciding on authorship and author order.
+%%%%%%%%%%%%%%%
+
+% (Explain the contributions of any non-author contributors here)
+% % We suggest you preserve this comment:
+% For a more detailed description of contributions from the community and others, see the GitHub issue tracking and changelog at \githubrepository.
+
+\section{Potentially Conflicting Interests}
+%%%%%%%
+%Declare any potentially competing interests, financial or otherwise
+%%%%%%%
+The CpHMD-related software may be of interest to ComputChem LLC, for which
+J.S. is a founder and scientific advisor. 
+J.S. also serves on the scientific advisory board of EoCys LLC.
+
+\section{Funding Information}
+%%%%%%%
+% Authors should acknowledge funding sources here. Reference specific grants.
+%%%%%%%
+We acknowledge financial support from the National Institutes of Health (R01GM098818 and R01CA256557 to Shen and R44GM134756 to Harris) and National Science Foundation (CBET1932963 to Shen).
+
+\section*{Author Information}
+\makeorcid
+
+\bibliography{cphmd}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% APPENDICES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\appendix
+
+
+\end{document}

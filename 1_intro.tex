@@ -1,0 +1,223 @@
+\section{Introduction} % - Vini 
+\subsection{Background}
+Solution pH is tightly regulated in biological environments \cite{Casey_Orlowski_2010_Nat.Rev.Mol.CellBiol.}. 
+In normal adult cells, intracellular pH$_{\rm i}$ is about 7.2 and extracellular pH$_{\rm e}$ is about 7.4 \cite{Webb_Barber_2011_Nat.Rev.Cancer};
+however, in cancer cells, the pH gradient is reversed,
+which promotes cancer progression, metabolic adaptation, and metastasis
+\cite{Webb_Barber_2011_Nat.Rev.Cancer,White_Barber_2017_J.CellSci.}. 
+Virtually all proteins depend on pH to maintain their structure and function
+\cite{Casey_Orlowski_2010_Nat.Rev.Mol.CellBiol.,Roos_Boron_1981_Physiol.Rev.}.
+% Protein folding is one example of a pH-dependent process, where the unfolded protein only can reach its native state in a narrow pH range. 
+A small change in pH can perturb the functions of many enzymes.
+ %The protonation state of residues is also critical in drug design once the ligand-protein binding is susceptible to charge changes \cite{Dominguez_Sussman_2010_Biochemistry,Bax_Edge_2017_ActaCrystallogrDStructBiol}. 
+For example, SARS coronavirus main proteases have the maximal
+cleavage activity in a narrow pH range around 7.0 \cite{Tan_Hilgenfeld_2005_J.Mol.Biol.}. 
+Below the optimum pH, the active site collapses
+due to the protonation state change of a histidine \cite{Tan_Hilgenfeld_2005_J.Mol.Biol.,Verma_Shen_2020_J.Am.Chem.Soc.}. 
+The function of human $\beta$-secretase 1 peaks at pH 4.5,
+\cite{Shimizu_Nukina_2008_Mol.CellBiol.}; at low or high pH
+the protonation state of the catalytic dyad changes, 
+which results in the closure of the ``flap'' that lies above
+the active site and blockage of 
+substrate entrance \cite{Ellis_Shen_2015_J.Am.Chem.Soc.}.
+%  the rational design of inhibitors must consider how the ligand interactions can alter the protonation state of the titratable residues into the binding site. 
+Solution pH is also an important parameter in the creation of dynamic, stimuli-responsive materials \cite{Li_Payne_2019_Biofabrication}. 
+For example, pH triggers the formation of hydrogel films
+from the biopolymer chitosan
+\cite{Morrow_Shen_2015_J.Am.Chem.Soc.}; 
+addition of surfactants allows the chitosan film to be reconfigured via a second pH signal to achieve different mechanical properties \cite{Tsai_Shen_2018_Chem.Mater.}.
+
+In a conventional molecular dynamics (MD) simulation,
+solution pH is implicitly taken into account by
+fixing the protonation states of titratable sites according to the experimental {\pka} values of
+model compounds (or peptides) or 
+traditional {\pka} calculations based on a static structure. 
+Traditional {\pka} methods include empirical
+approaches, e.g.,
+PropKa \cite{Olsson_Jensen_2011_J.Chem.TheoryComput.},
+Rosetta \cite{Kilambi_Gray_2012_Biophys.J.},
+Poisson-Boltzmann solvers
+MCCE \cite{Song_Gunner_2009_J.Comput.Chem.},
+APBS/PDB2PQR \cite{Unni_Baker_2011_J.Comput.Chem.}, 
+DelPhiPKa \cite{Wang_Alexov_2016_Bioinformatics},  
+H++ \cite{Anandakrishnan_Onufriev_2012_NucleicAcidsRes.},
+and other variants \cite{WarwickerJim_WarwickerJim_2011_Proteins}.
+These tools are fast; however, 
+the predicted protonation states are often incorrect
+for deeply buried sites
+\cite{Alexov_Word_2011_Proteins},
+enzyme active sites \cite{Huang_Shen_2018_J.Phys.Chem.Lett.},
+transmembrane proteins \cite{Huang_Shen_2016_Nat.Commun.},
+and cysteines or lysines in general \cite{Liu_Shen_2019_J.Am.Chem.Soc.,Harris_Shen_2020_J.Chem.TheoryComput.,Liu_Shen_2021_J.Med.Chem.a}.
+% due to a significant {\pka} shift in the protein environment relative to the solution (model) value.
+% 2) Even if the assignment is correct based on the initial experimental structure, a change in protonation (or tautomer) state may occur during dynamics.. 
+Also, even assuming an accurate assignment of protonation states at the beginning of MD, the conformational changes sampled
+by the simulation may modify the electrostatic environment around the titratable groups, changing their protonation states. 
+To account for 
+the direct coupling between conformational dynamics and protonation state changes and to offer more accurate \pka\ predictions, constant pH MD methods have been developed.
+
+Over the past two decades, much progress has been made in the
+development of constant pH MD methods.
+% Regarding the system modeling, the C$\alpha$ structure-based model CpHMD is one of the highest CG level approaches; such model treats amino acid residues as beads centered in $\alpha$ carbon, and titratable residues charge is also placed in the center of the bead.  
+% \cite{Contessoto_Leite_2016_J.Chem.TheoryComput.}. 
+% The titratable Martini is another example of CpHMD-CG, but in turn, it can treat each residue for several beads that represent a group of two to five heavy atoms \cite{Grunewald_Marrink_2020_J.Chem.Phys.}. 
+% Finally, the most sophisticated models can explicitly treat all atoms of the system, but even with several ways to model the simulated systems, the CpHMD methods are grouped into discrete and continuous categories. 
+% \cite{Chen_Khandogin_2008_Curr.Opin.Struct.Biol.,Chen_Shen_2014_Mol.Simulat.}. 
+In a discrete (also known as stochastic) constant pH MD (DpHMD), the MD trajectory is periodically
+interrupted by the Metropolis Monte-Carlo (MC) sampling of 
+protonation states \cite{Baptista_Soares_2002_J.Chem.Phys.,Mongan_McCammon_2004_J.Comput.Chem.,Swails_Roitberg_2014_J.Chem.TheoryComput.,Stern_Stern_2007_J.Chem.Phys.,Chen_Roux_2015_J.Chem.TheoryComput.}. 
+Here, protonation and deprotonation of titratable groups is
+sampled discretely, assuming one of the two states. 
+In contrast, the continuous constant pH MD (CpHMD) 
+\cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.,Khandogin_Brooks_2006_Biochemistry,Wallace_Shen_2011_J.Chem.TheoryComput.,Wallace_Shen_2012_J.Chem.Phys.,Huang_Shen_2016_J.Chem.TheoryComput.}
+treats the protonation states of ionizable sites using an auxiliary set of continuous titration coordinates based on an extended Hamiltonian $\lambda$-dynamics approach \cite{Kong_Brooks_1996_J.Chem.Phys.}. 
+This method allows the system to escape local energy minima by transiently accessing the partially protonated states, which are unphysical.
+Although the latter is a major caveat, the CpHMD method offers significantly faster convergence and importantly it can be implemented for implicit-, hybrid-, and fully explicit-solvent simulations.
+On the contrary, although progress is being made, 
+e.g., via the approach of nonequilibrium MD \cite{Stern_Stern_2007_J.Chem.Phys.,Chen_Roux_2015_J.Chem.TheoryComput.,Radak_Roux_2017_J.Chem.TheoryComput.}, 
+it is very challenging to extend the Monte-Carlo based DpHMD method to fully explicit-solvent simulations
+due to the low acceptance rate as a result of the 
+large energy change.
+%In this tutorial, we will focus on the CpHMD methods.
+
+In the implicit-solvent constant pH scheme, sampling of both conformational dynamics and protonation states is performed in implicit solvent, typically a generalized-Born (GB) model.
+Implementations of this scheme include the GBMV-
+\cite{Lee_Brooks_2003_J.Comput.Chem.} and 
+GBSW- \cite{Im_Brooks_2003_J.Comput.Chem.} based CpHMD \cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.,Khandogin_Brooks_2006_Biochemistry} in CHARMM  \cite{Brooks_Karplus_2009_J.Comput.Chem.},
+and the GBNeck2-based CpHMD
+\cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.},
+and the OBC-GB \cite{Onufriev_Bashford_2002_J.Comput.Chem.}
+based DpHMD method 
+\cite{Mongan_McCammon_2004_J.Comput.Chem.}
+in Amber \cite{Case_Kollman_2018_}.
+In the hybrid-solvent constant pH scheme, conformational sampling
+is conducted with explicit solvent, while a continuum
+electrostatic model, e.g., GB or Poisson-Boltzmann (PB)
+is used to calculate the solvation forces 
+on the $\lambda$ particles for the CpHMD methods
+or the energy changes due to protonation-state change
+for the DpHMD methods.
+Implementations of this scheme include
+the PB/TIP3P based stochastic DpHMD method
+\cite{Baptista_Soares_2002_J.Chem.Phys.}
+for GROMACS \cite{Spoel_Berendsen_2005_J.Comput.Chem.},
+the GBSW/TIP3P based CpHMD method \cite{Wallace_Shen_2011_J.Chem.TheoryComput.}
+in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.},
+and the OBC-GB/TIP3P based DpHMD method 
+\cite{Swails_Roitberg_2014_J.Chem.TheoryComput.}
+in Amber \cite{Case_Kollman_2018_}.
+Note, the GBSW/TIP3P based CpHMD method \cite{Wallace_Shen_2011_J.Chem.TheoryComput.} was extended to the treatment of transmembrane systems \cite{Huang_Shen_2016_Nat.Commun.} by incorporating the membrane GBSW model \cite{Im_Brooks_2003_Biophys.J.}.
+Finally, an all-atom or fully explicit-solvent
+CpHMD method was implemented in CHARMM
+\cite{Brooks_Karplus_2009_J.Comput.Chem.}
+as a part of the $\lambda$-dynamics functionality
+in the BLOCK module (CPHMD$^{\rm MS\lambda D}$) 
+by the Brooks group \cite{Goh_Brooks_2014_Proteins}
+and as an extension to the GBSW and hybrid-solvent CpHMD 
+methods in the PHMD module by the Shen group
+\cite{Wallace_Shen_2012_J.Chem.Phys.,Huang_Shen_2016_J.Chem.TheoryComput.}.
+The all-atom CpHMD method by the Shen group is the only one that includes titratable water to compensate for the net charge fluctuation as a result of proton titration in the CpHMD simulation
+\cite{Chen_Shen_2013_Biophys.J.}.
+An all-atom CpHMD implementation was also developed by the
+Grubm\"{u}ller group
+\cite{Donnini_Grubmuller_2016_J.Chem.TheoryComput.}
+in GROMACS
+\cite{Spoel_Berendsen_2005_J.Comput.Chem.}, although it has not been validated for a large number of proteins yet.
+Currently, the only all-atom discrete constant pH method is based on nonequilibrium MD,
+and it is implemented in NAMD \cite{Phillips_Schulten_2005_J.Comput.Chem.}
+by the Roux group
+\cite{Chen_Roux_2015_J.Chem.TheoryComput.,Radak_Roux_2017_J.Chem.TheoryComput.}.
+% Below we will focus on the CpHMD implementations
+% developed by the Shen group.
+
+While accurate prediction of protonation states or {\pka} values is a goal, a major application of constant pH MD is to elucidate the mechanisms of pH-dependent or proton-coupled conformational dynamics. 
+One can argue that the latter can also be studied by conventional fixed-protonation-state MD by running simulations with different protonation states.
+While this may well be true when the switch of one protonation state is involved, the problem quickly becomes intractable 
+when multiple titration sites are involved.
+Furthermore,
+the identity of the titratable site responsible for proton-coupled conformational changes is
+often unclear, which makes the fixed-protonation-state approach unfeasible.
+% For example,
+% in the spider silk protein \cite{Wallace_Shen_2012_J.Phys.Chem.Lett.},
+% the sodium-proton antiporter NhaA \cite{Huang_Shen_2016_Nat.Commun.,Henderson_Shen_2020_Proc.Natl.Acad.Sci.USA} and the proton-coupled drug efflux pump AcrB \cite{Yue_Shen_2017_J.Chem.TheoryComput.}.
+Importantly, by running fixed-protonation-state MD one cannot obtain the {\pka} value for the conformational transition \cite{Wallace_Shen_2012_J.Phys.Chem.Lett.,Huang_Shen_2016_Nat.Commun.,Yue_Shen_2017_J.Chem.TheoryComput.,Henderson_Shen_2020_Proc.Natl.Acad.Sci.USA}, 
+which can be compared with experiment to validate the microscopic details revealed by simulation.
+% Constant pH methods have been reviewed in the past \cite{Chen_Khandogin_2008_Curr.Opin.Struct.Biol.,Wallace_Shen_2009_MethodsEnzymol.,Chen_Shen_2014_Mol.Simulat.}. In this tutorial 
+% pH-dependent processes often involve the
+% protonation state switches of multiple titratable sites, some of which may sample both protonated and deprotonated states.
+% Examples include
+% protein folding \cite{Khandogin_Brooks_2006_Proc.Natl.Acad.Sci.USA,Khandogin_Brooks_2007_Proc.Natl.Acad.Sci.USA}
+% and pH-triggered self assembly of materials \cite{Morrow_Shen_2015_J.Am.Chem.Soc.}.
+
+Table~\ref{Table:applications} summarizes the applications of the implicit-, hybrid-, and fully explicit-solvent CpHMD methods developed in the Shen group.
+% Over the past decade, CpHMD simulations have been applied 
+% to proteins in different environments \cite{Chen_Shen_2014_Mol.Simulat.,Radak_Roux_2017_J.Chem.TheoryComput.}. 
+The implicit-solvent GBSW- and GBNeck2-CpHMD methods have been mainly applied to {\pka} predictions of proteins
+\cite{Khandogin_Brooks_2006_Biochemistry,Wallace_Shen_2009_MethodsEnzymol.,Wallace_Shen_2011_Proteins,Harris_Shen_2019_J.Chem.Inf.Model.,Harris_Shen_2020_J.Chem.TheoryComput.},
+while the hybrid-solvent and all-atom CpHMD methods have been additionally applied to elucidate the mechanisms of pH-dependent or proton-coupled conformational processes, e.g.,
+protein unfolding
+\cite{Yue_Shen_2018_Phys.Chem.Chem.Phys.},
+structure-function relationships of proteases and kinases \cite{Ellis_Shen_2015_J.Am.Chem.Soc.,Tsai_Shen_2019_J.Am.Chem.Soc.,Ma_Shen_2021_J.Chem.Inf.Model.,Verma_Shen_2020_J.Am.Chem.Soc.,Henderson_Shen_2020_J.Chem.Phys.}, protein/ligand binding \cite{Ellis_Shen_2016_J.Phys.Chem.Lett.,Harris_Shen_2017_J.Phys.Chem.Lett.,Henderson_Shen_2018_J.Phys.Chem.Lett.}, 
+conformational activation of transmembrane channels and transporters \cite{Chen_Shen_2016_J.Phys.Chem.Lett.,Yue_Shen_2017_J.Chem.TheoryComput.,Huang_Shen_2016_Nat.Commun.},
+and materials \cite{Morrow_Shen_2015_J.Am.Chem.Soc.,Tsai_Shen_2018_Chem.Mater.}.
+A recent application of GBNeck2-CpHMD method is the prediction of nucleophilic cysteine and lysine sites for targeted covalent drug design \cite{Liu_Shen_2019_J.Am.Chem.Soc.,Verma_Shen_2020_J.Am.Chem.Soc.,Henderson_Shen_2020_J.Chem.Phys.,Liu_Shen_2021_J.Med.Chem.a,Liu_Shen_2021_RSCMed.Chem.}. 
+In this tutorial, we will discuss GBNeck2-CpHMD in Amber \cite{Huang_Shen_2018_J.Phys.Chem.Lett.,Harris_Shen_2019_J.Chem.Inf.Model.},
+hybrid-solvent  \cite{Wallace_Shen_2011_J.Chem.TheoryComput.},
+and particle-mesh Ewald (PME) all-atom CpHMD 
+\cite{Huang_Shen_2016_J.Chem.TheoryComput.}
+in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.}. 
+% The GB-based CpHMD methods
+% have been validated for a large number of proteins and the latter has additionally revealed the pH-dependent or proton-coupled mechanisms of various soluble and transmembrane proteins.
+
+\begin{table*}
+\begin{center}
+\begin{tabular}{p{1.2in}p{3in}ll}
+System &  Topic  & Method & Reference\\ 
+\hline
+\multicolumn{2}{l}{\bf Soluble proteins} & \\
+Benchmark proteins &  {\pka} calculations & GBSW 
+& \cite{Khandogin_Brooks_2006_Biochemistry,Wallace_Shen_2009_MethodsEnzymol.}\\
+SNase  & Blind {\pka} predictions for 87 engineered mutant proteins   & GBSW & \cite{Wallace_Shen_2011_Proteins}\\
+Peptides and mini-proteins & pH-dependent folding mechanisms & GBSW & \cite{Khandogin_Brooks_2006_Proc.Natl.Acad.Sci.USA,Khandogin_Brooks_2007_Proc.Natl.Acad.Sci.USA,Khandogin_Brooks_2007_J.Am.Chem.Soc.}\\
+Benchmark proteins & {\pka} calculations & Hybrid & \cite{Wallace_Shen_2011_J.Chem.TheoryComput.}\\
+NTL9, BBL & Unfolded states and unfolding mechanism & Hybrid& \cite{Shen_Shen_2010_J.Am.Chem.Soc.,Yue_Shen_2018_Phys.Chem.Chem.Phys.}\\
+SNase   & {\pka} calculation for a deeply buried lysine; proton-coupled opening of the site   & Hybrid & \cite{Shi_Shen_2012_Biophys.J.}\\
+Spider silk protein & pH sensing residues for dimerization & Hybrid & \cite{Wallace_Shen_2012_J.Phys.Chem.Lett.}\\
+BACE1, BACE2, cathepsin D, renin, plasmepsin D & Acid/base roles of the catalytic dyad; binding-induced protonation state change of the inhibitor; pH-dependent conformational dynamics;
+proton-coupled dynamics of binding site water;
+pH-dependent 
+inhibitor binding free energy calculations & Hybrid & \cite{Ellis_Shen_2015_J.Am.Chem.Soc.,Ellis_Shen_2016_J.Phys.Chem.Lett.,Ellis_Shen_2017_J.Comput.Chem.,Harris_Shen_2017_J.Phys.Chem.Lett.,Henderson_Shen_2018_J.Phys.Chem.Lett.,Ma_Shen_2021_J.Chem.Inf.Model.,Henderson_Shen_2021_J.Chem.Inf.Model.}\\
+c-Src Kinase & Proton-coupled conformational change of the DFG motif & Hybrid & \cite{Tsai_Shen_2019_J.Am.Chem.Soc.}\\
+% BACE1, cathepsin D &  pH-dependent binding free energy calculations & Hybrid & \cite{Harris_Shen_2017_J.Phys.Chem.Lett.}\\
+Benchmark proteins & {\pka} calculations for Asp/Glu/His &  All-atom & \cite{Huang_Shen_2016_J.Chem.TheoryComput.} \\
+% Plasmepsin & Dissect the pH-dependent interaction of the ligand binding site, identify proton coupled allostery, elucidate the catalytic roles of the active site & Hybrid-Solvent \\
+Various enzymes & Prediction of proton donor and nucleophile and physical determinants & Hybrid & \cite{Huang_Shen_2018_J.Phys.Chem.Lett.}\\
+Benchmark proteins & {\pka} calculations for Asp/Glu/His/Cys &  GBNeck2 & \cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}\\
+Various kinases &  Prediction and rationalization of reactive Lys and Cys  & GBNeck2 & \cite{Liu_Shen_2019_J.Am.Chem.Soc.,Liu_Shen_2021_J.Med.Chem.,Liu_Shen_2021_RSCMed.Chem.}\\
+Coronavirus papain-like proteases  &   Protonation states of His/Cys; proton-coupled conformational dynamics  & GBNeck2 & \cite{Henderson_Shen_2020_J.Chem.Phys.}\\
+Coronavirus main proteases  & Protonation states of His and Cys; proton-coupled conformational change of the binding site & GBNeck2 & \cite{Verma_Shen_2020_J.Am.Chem.Soc.}\\
+\multicolumn{2}{l}{\bf Transmembrane proteins} & \\
+Proton channel M2 & Proton-coupled channel opening/closing & Membrane-hybrid & \cite{Chen_Shen_2016_J.Phys.Chem.Lett.} \\
+Sodium/proton antiporter NhaA   & Identification of proton binding residues; proton-coupled conformational changes & Membrane-hybrid & \cite{Huang_Shen_2016_Nat.Commun.,Henderson_Shen_2020_Proc.Natl.Acad.Sci.USA} \\ Efflux pump AcrB  &  Identification of proton binding residues; proton-coupled conformational transitions & Membrane-hybrid & \cite{Yue_Shen_2017_J.Chem.TheoryComput.}  \\
+$\mu$-opioid receptor & {\pka} calculation & Membrane-hybrid & \cite{Vo_Ellis_2021_Nat.Commun.,Mahinthichaichan_Shen_2021_JACSAu}\\
+\multicolumn{2}{l}{\bf Materials} & \\
+Various surfactants & {\pka} calculation in micelle & GBSW and hybrid& \cite{Morrow_Shen_2011_J.Phys.Chem.B} \\
+Fatty acid & {\pka} calculation in micelle and bilayer & All-atom& \cite{Morrow_Shen_2014_J.Chem.Phys.} \\
+Fatty acid & pH-dependent micelle/bilayer formation & Hybrid& \cite{Morrow_Shen_2012_J.Chem.Phys.,Morrow_Shen_2013_Langmuir}\\
+Peptide & pH-dependent unfolding of $\beta$-sheets; phase transition {\pka} & All-atom &  \cite{Cote_Shen_2014_J.Phys.Chem.C}\\
+Polysaccharide chitosan & Glucosamine titration; pH-dependent dissociation of a model crystallite; phase transition {\pka}; pH-dependent interaction with a surfactant & All-atom & \cite{Morrow_Shen_2015_J.Am.Chem.Soc.,Tsai_Shen_2018_Chem.Mater.}\\
+\end{tabular}
+\end{center}
+\caption{\textbf{Applications of the continuous constant pH MD (CpHMD) methods.}
+GBSW-CpHMD \cite{Khandogin_Brooks_2005_Biophys.J.,Khandogin_Brooks_2006_Biochemistry},
+hybrid-solvent \cite{Wallace_Shen_2011_J.Chem.TheoryComput.} and membrane-enabled hybrid-solvent \cite{Huang_Shen_2016_Nat.Commun.} CpHMD methods are implemented in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.}.
+The GRF \cite{Wallace_Shen_2012_J.Chem.Phys.,Chen_Shen_2013_Biophys.J.}
+and PME \cite{Huang_Shen_2016_J.Chem.TheoryComput.}  based all-atom 
+CpHMD methods are also implemented in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.} and they can be used with co-titrating ions \cite{Wallace_Shen_2012_J.Chem.Phys.} or water \cite{Chen_Shen_2013_Biophys.J.}.
+GBNeck2-CpHMD \cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.} method is implemented in Amber18 \cite{Case_Kollman_2018_}.
+The pH replica-exchange protocol \cite{Wallace_Shen_2011_J.Chem.TheoryComput.}
+was used for all applications except for those with GBSW-CpHMD where the temperature replica-exchange protocol \cite{Khandogin_Brooks_2006_Biochemistry} was used.
+All implementations except for GBNeck2-CpHMD are for CPU computing.
+}
+\label{Table:applications}
+\end{table*}

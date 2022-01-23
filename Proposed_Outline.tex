@@ -1,0 +1,106 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{CpHMD Tutorial}
+\author{Jack A. Henderson, Ruibin Liu, Julie Ann Harris, Vinicius M. de Oliveira, Jana Shen}
+\date{June 2021}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+% This section gives the background and idea/purpose of CpHMD
+% Importance of pH in simulations
+% How Traditional MD Handles Titratable Sites
+% How are titratable sites treated without pHMD (PropKA, Delphi,  H++, ect...)
+% Idea of pHMD
+% Brief description of types of pHMD (DpHMD and CpHMD)
+% Advantages of CpHMD
+% Examples of CpHMD in action should range from CHARMM Hybrid-Solvent CpHMD to Amber CpHMD simulations probing for reactive Cys and Lys targets.
+
+% Figure Concept: A figure showing several different protein systems that we have investigated with CpHMD.
+
+\section{Scope}
+% This section needs to describe what is covered in this review.
+% Introduce CpHMD in the AMBER and CHARMM Packages, State the Types of CpHMD in AMBER and CHARMM, i.e. AMBER: Async pHREX with GBNeck2 and PME on GPUs, CHARMM: pHREX Hybrid-Solvent CpHMD on CPUs
+% 1.) How to prepare a system for CpHMD
+% 2.) Running CpHMD in CHARMM Equilibration to Production
+% 3.) Running CpHMD in AMBER Equilibration to Production
+% 4.) Analyzing Lambda Files, all the classic lambda values analysis procedures.
+
+\section{CpHMD Theory/Concept}
+% Topics to Cover:
+%   1.) Brief Description of how titratable sites are handle, i.e. lambda dynamics and tautomers
+%   2.) Give an overview of the extended Hamiltonian.
+%   3.) Discuss the importance of pH-based replica exchange and its applications on CPUs and GPUs
+
+% Figure Concept: Here would be a good place to show the classic MD protocol with the CpHMD portion and we could show a small example of the replica exchange process.
+
+\section{Prerequisites}
+% Who is the tutorial designed for, beginners or people with MD experience?
+% What knoweledge should the user have prior to running CpHMD?
+% Why should a person choose to run a simulation with CpHMD
+% What should a person know before running a CpHMD simulation, pH-range, important titratable site... ect..
+
+\subsection{Software Requirements}
+% CHARMM Package Version, number of processors recommended for peak performance 
+% AMBER Package version, Recommended GPUs 
+% Python Packages and Version required for Async-Replica Exchange 
+% Python Packages and Version required for the CpHMD-Analysis Lambda Parser
+
+\section{Workflow for running a CpHMD simulation}
+% State an outline of the steps necessary for running the CpHMD simulations in general.
+% Figure concept: Show a diagram of the steps needed to run a CpHMD simulation and images representing those steps. 
+
+\subsection{System Preparation} % Here I think we should focus only on system preparation of soluble proteins. 
+%   1.) Where to get your structures PDB and OPM
+%   2.) Filling or Correcting missing residues/atoms or mutated residues, SWISS-Model, MMTSB, Chimera, and CHARMM
+%   3.) Further structure preparation with MMTSB and replacement of HIS with HSP/HIP 
+%   4.) Adding hydrogens, i.e fixing the Syn-Configuration of Asp and Glu
+%   5.) Additional stuff could be included here such as using HMR and CHAMBER for the AMBER setup.  
+
+% Figure Concept: Show image of the ASP in the double protonated (syn-Configuration) State
+
+\subsection{Equilibration}
+% Describe the protocol for equilibrating the a soluble protein. 
+% The equilibration method will vary depending on the type of CpHMD
+%   1.) Hybrid-Solvent in CHARMM
+%   2.) GBNeck2 in AMBER
+%   3.) PME in AMBER
+
+\subsection{Production with CpHMD}
+% Here we can describe a few different styles of production run with CpHMD. 
+% this section can be broken down into three sections
+%   1.) CHARMM Hybrid-Solvent CpHMD simulations with pHREX
+%   2.) Single-pH runs with CpHMD Simulations in AMBER
+%   3.) Async-pHREX with CpHMD simulations in AMBER
+
+\subsection{MD Specific Settings}
+% 1.) CHARMM Specific
+% 2.) Amber Specific
+% Things to Include: 
+%   -) FFs
+%   -) Thermostats
+%   -) Baristas
+%   -) Cutoffs
+%   -) ect...
+
+\section{Lambda File Analysis}
+% Here we can describe how to analyze CpHMD results
+%   1.) Calculations of Unprot. Fractions
+%   2.) Calculations pKa  
+%   3.) How to Monitor pKa Convergence
+%   3.) Additional Analysis could include proton-coupling, ect... 
+
+
+% Figure Concept: Here we should have a 2 panel figure. 
+%   -) Panel 1: Raw Lambda Value versus time @ a single pH with a duel y-Axis and over the plot we showing the running S-value. 
+%   -) Panel 2: We show a titration Curve
+
+\section{Conclusion}
+% Restate the coverage of the tutorial. 
+% Mention tools for analyzing trajectories, cpptraj  and MDAnalysis
+% Mention tools for visualizing trajectories. 
+
+\end{document}
