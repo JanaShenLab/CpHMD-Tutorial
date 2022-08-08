@@ -1,20 +1,11 @@
 \subsection{The continuous constant pH molecular dynamics framework}
 
-In the CpHMD framework \cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.}, each titratable residue is assigned a titration coordinate $\lambda_i$, which is bound between 0 and 1, representing the (physical) protonated and deprotonated states, respectively. 
-To satisfy the bounds, 
-$\lambda_i$ is expressed as a function of $\theta$ in the work of Shen group,
+In continuous CpHMD, each titratable residue is assigned a titration coordinate, $\lambda_i$ \cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.}. 
+We attribute to this coordinate an implicit function of an underlying coordinate $\theta_i$ such that $\lambda_i$ is bound between 0 and 1:
 \begin{equation}
     \lambda_i = \sin^2\theta_i,
-    \label{eq:lambda_theta}
 \end{equation}
-where $\theta_i$ can take on any value and is the underlying coordinate that is assigned fictitious mass (see below). 
-The functional form of $\lambda$ ( Eq.~\ref{eq:lambda_theta}) is somewhat arbitrary. 
-In fact, in the MS$\lambda$D based CpHMD method 
-\cite{Knight_Brooks_2011_J.Chem.TheoryComput.}
-as well as the $\lambda$-dynamics based CpHMD implementation in GROMACS 
-\cite{Donnini_Grubmuller_2011_J.Chem.TheoryComput.,Donnini_Grubmuller_2016_J.Chem.TheoryComput.},
-$\lambda$ is expressed using different functional forms of $\theta$.
-
+where 0 and 1 represent the protonated and deprotonated states, respectively. 
 Since $\lambda$ continuously evolves between 0 and 1,
 in simulation analysis we apply cutoffs to define
 protonated ($\lambda^P < 0.2$) and deprotonated states ($\lambda^U > 0.8$). 
@@ -34,8 +25,8 @@ The two first terms of Eq.~\ref{eq:Hamiltonian} give the kinetic energies of rea
 and virtual $\lambda$ particles. 
 $U^{\rm int}$ represent the titration-independent bonded and non-bond energies. 
 We note that the force field parameters of some residue types (e.g., carboxylates) may
-depend on the protonation state; however, in the CpHMD \cite{Khandogin_Brooks_2005_Biophys.J.,Wallace_Shen_2011_J.Chem.TheoryComput.,Goh_Brooks_2014_Proteins,Huang_Shen_2016_J.Chem.TheoryComput.,Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}
-as well as the hybrid MD/MC based DpHMD \cite{Mongan_McCammon_2004_J.Comput.Chem.,Swails_Roitberg_2014_J.Chem.TheoryComput.}
+depend on the protonation state; however, in the CpHMD \cite{Khandogin_Brooks_2005_Biophys.J.}
+as well as the hybrid MD/MC based DpHMD \cite{Mongan_McCammon_2004_J.Comput.Chem.}
 implementations the bonded parameters 
 are fixed in one of the protonation states.
 This is a limitation that needs to be addressed in the future.

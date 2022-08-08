@@ -1,0 +1,452 @@
+\documentclass[11pt,letterpaper]{businessletter}
+\special{papersize=8.5in,11in} %make sure paper size is correct
+\usepackage[]{fancyhdr,helvet}
+\usepackage[]{amsmath,fancyhdr,helvet,afterpage,overcite,xurl}
+\usepackage[colorlinks]{hyperref}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[left=1in,right=1in,top=1in,bottom=0in,nohead]{geometry}
+
+
+% \hypersetup
+% {
+%  pdftitle = {},
+%  colorlinks=true,
+%  linkcolor=NavyBlue,
+%  citecolor=NavyBlue,
+%  urlcolor=blue
+% }
+
+
+%arial font
+\renewcommand{\familydefault}{\sfdefault}
+\urlstyle{rm}
+\newcommand{\pka}{p$K_a$}
+
+%suppress indentation and add space between paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
+
+\signature{Jana Shen}
+\begin{document}
+\begin{letter}
+{
+Editor \\
+Live Journal of Computational Molecular Science \\
+}
+
+\opening{Dear Editor,}
+We are pleased to submit a revised manuscript entitled
+``A Guide to the Continuous Constant pH Molecular Dynamics 
+Methods in Amber and CHARMM v1.0
+in \textit{Live Journal of Computational Molecular Science}.
+
+We thank the reviewers for their constructive critiques
+and helpful comments as well as suggestions. 
+We have made revision to the manuscript to fully address and accommodate them.
+Below we present our response and revision.  
+The revised excerpts are highlighted in the 
+revised manuscript. 
+Unless otherwise noted, page numbers refer to the revised version.
+
+\bigskip
+{\large \bf Reviewer E}
+
+
+We thank the reviewer for the positive view of the manuscript and we address the minor comments below.
+
+\textbf{Comment 1:} 
+
+\textcolor{Blue}{
+The presence of explicit solvent creates a considerable challenge and essentially renders the discrete algorithm essentially impractical. One compromise is to execute the discrete jump of protonation assuming an implicit solvent model, while propagating the unbiased dynamics with explicit solvent. The models here are mixed. The relative balance of protonation states is governed under the implicit solvent, but the conformational sampling results from the explicit solvent. This is certainly an interesting avenue, but the users should be told clearly and unambigusouly that the ionization equilibrium is really that of an implicit solvent model. Please make sure this is clear.
+}
+
+
+\textbf{Response and Revision:} 
+We agree with the reviewer. 
+
+We discussed the hybrid-solvent constant pH scheme
+on page 2. 
+To make it more clear to the reader, we now separate the discussion of the three solvent schemes in three paragraphs.
+To further clarify the hybrid-solvent CpHMD method, 
+we added the sentence in the beginning of ``3. Workflow for the hybrid-solvent CpHMD in CHARMM'':
+
+On page 7, right, just under the section 3 title:
+
+\textcolor{red}{
+The hybrid-solvent CpHMD method makes uses of explicit solvent 
+for conformational dynamics and a GB model for propagating protonation states [33].
+}
+
+\textbf{Comment 2:}
+
+\textcolor{Blue}{
+Certainly, lambda-dynamics and the non-equilibrium MD/MC algorithms provide more rigorous solutions to generate constant pH simulation consistently within the explicit solvent model. It is correct to qualify the neMD/MC algorithm as "discrete" in the sense that system only visits the end-states, although is would also be illuminating to point out that the non-equilibrium switches require a continuous coupling parameter lambda like lambda-dynamics. In neMD/MC, lambda is changed from 0 to 1 according to a schedule,while in lambda-dynamics the coupling parameters are free to evolve dynamically. There is some conceptual similarity between lambda-dynamics and neMD/MC and pointing out this similarity may be beneficial to the users.
+}
+
+\textbf{Response and Revision:} 
+We agree with the reviewer and expanded our discussion 
+of the neMD/MC approach. 
+
+On page 2, left, last paragraph continued onto the first paragraph on the right:
+
+\textcolor{red}{
+Development of an all-atom DpHMD algorithm based on the
+hybrid MD/MC approach is challenging, 
+as in explicit solvent a switch in protonation state
+leads to a large energy change, which results in
+almost complete rejection for the MC moves [29].
+This problem, which is due to the lack of overlap between explicit solvent
+configurations for the protonated and deprotonated states [29],
+has been tackled by introducing a free energy calculation [37]
+or a short non-equilibrium MD (neMD) [28,29,38]
+(see later discussion).
+}
+
+Page 2, right, last paragraph, continued to the first paragraph 
+on page 3, left:
+
+\textcolor{red}{
+To circumvent the aforementioned configuration overlap problem
+in a DpHMD framework, B\"{u}rgi and van Gunsteren used thermodynamic integration (TI)
+to calculate the titration free energy change for the MC move [37];
+however, TI calculations are too expensive
+and do not readily converge.
+Recently, an all-atom DpHMD method based on neMD and MC
+has been implemented in NAMD [54] 
+by the Roux group [29,38].
+This approach, which was originally proposed by Stern [28],
+has the flavor of both TI and $\lambda$ dynamics
+methods, as it makes use of a coupling parameter ($\lambda$) in
+a short neMD trajectory to gradually change the protonation 
+state thus allowing solvent to adjust [29,38].
+}
+
+\textbf{Comment 3:}
+
+\textcolor{Blue}{
+The text says "Although the latter is a major caveat, the CpHMD method offers significantly faster convergence and importantly it can be implemented for implicit-,hybrid-, and fully explicit-solvent simulations." I am not sure why lambda-dynamics can achieve faster convergence than discrete jumps in the case of implicit solvent simulations. Since implicit solvent simulations permit the purest form of the discrete algorithm, what is the advantage to execute lambda-dynamics then? Isn’t a simple discrete jump with MC conceptually simpler than lambda-dynamics (no need to masses,intermediate states, etc)? Based on my understanding of the scripting for CHARMM and AMBER, I would think that if you have the infrastructure to run lambda-MD, converting this to remove the MD on the lambda and replace it by random discrete jumps of lambda between 0 and 1 could be easily realized. Please comment.
+}
+
+
+\textbf{Response and Revision:} 
+We agree with the reviewer that the hybrid MD/MC or neMD/MC DpHMD methods are conceptually simpler
+and practically easier to implement than the lambda-dynamics based CpHMD methods. 
+In fact, the first DpHMD method was implemented as a Linux Shell
+script by Baptista (Baptista et al, JCP 2002). 
+As to {\pka} convergence, we regret that the sentence wasn't phrased well.
+What we wanted to say was that CpHMD methods converge significantly faster 
+for coupled residues and can be readily extended to all-atom simulations.
+The convergence advantage is due to the fact that at every MD step the lambda values of all residues are updated,
+whereas in a DpHMD method, the protonation state of a single residue is attempted at each MC step.
+Although attempting to update multiple sites is possible, 
+the acceptance ratio for such a MC move may be lower.
+To clarify this, we revised and expanded the corresponding text:
+
+On page 2, left, end of the second last paragraph:
+
+\textcolor{red}{
+Besides the advantage that only physical (protonated and deprotonated) states are sampled, the DpHMD method based on
+the hybrid MD/MC scheme is conceptually simple
+and practically straightforward to implement.
+...
+Although sampling the unphysical intermediate states is a major caveat, the CpHMD method offers significantly faster convergence for coupled residues,
+and importantly it can be readily extended to all-atom simulations.
+The faster convergence arises from the fact that at every MD step the $\lambda$ values of 
+all titratable sites are updated, whereas in a typical DpHMD implementation, the protonation state of 
+a single residue is attempted at each MC step.
+}
+
+\textbf{Response and Revision:} 
+
+\textbf{Comment 4:}
+
+\textcolor{Blue}{
+The text says "The all-atom CpHMD method by the Shen group is the only one that includes titratable water to compensate for the net charge fluctuation as a result of proton titration in the CpHMD simulation [48]." In fact, previous implementation of the neMD/MC algorithm also included charge neutrality (Chen and Roux, JCTC 2015) where protonation was coupled to the conversion of a water molecule into a chloride anion, and deprotonation was coupled to the conversion of a potassium into a water molecule (eqs 30 and 31 in their paper). The NAMD implementation of Radak et al (JCTC 2017) supports this feature also, as multiple sites can be protonated and deprotonated simultaneously. However, Chen and Roux showed that charge neutrality acts as a constraint and decreases the acceptance ratio. It is like to have similar effects in lambda-dynamics. Lastly, charge neutrality is not a prerequisite in simulations with PBC and PME (in fact, charge neutrality is necessarily violated during a charging free energy calculation)
+}
+
+\textbf{Response and Revision:} 
+It was our oversight to miss this aspect in the work of Roux and coworkers.  
+We thank the reviewer for pointing it out. 
+We revised the text accordingly.
+
+Page 2, right, second last paragraph:
+
+\textcolor{red}{
+To compensate for the net charge fluctuation due to proton titration, the Shen group introduced the first
+co-titratable ion [34] or water [50] scheme.
+}
+
+Page 3, left, first paragraph:
+
+\textcolor{red}{
+Analogous to the titratable ion or water approach of the Shen group [34,50], the neMD/MC implementation of the Roux group used the chemical transformation 
+between a counterion and water to maintain charge neutrality of the system [29,38].
+Interestingly, while the Roux group reported that charge neutrality 
+acts as a constraint and decreases the acceptance ratio in the MC steps [29,38], 
+the Shen group observed a slow down in the convergence of protonation state sampling [35,50,52].
+}
+
+\textbf{Comment 5:}
+
+\textcolor{Blue}{
+Page 2 \\
+The text says "While this may well be true when the switch of one protonation state is involved, the problem quickly becomes intractable when multiple titration sites are involved. " Perhaps emphasize that the problem becomes intractable when the number N of sites is large because the number of possible ionization states N goes like 2$^N$.
+}
+
+
+\textbf{Response and Revision:} We thank the reviewer for the great suggestion and we revised the text.
+
+Page 3, left, second paragraph:
+
+\textcolor{red}{
+While this may well be true when the switch of one protonation state is involved, the problem becomes intractable when 
+the number $N$ of titratable sites is large because
+the number of possible protonation states increases as 2$^N$.
+}
+
+
+\textbf{Comment 6:}
+
+\textcolor{Blue}{
+Page 3 \\
+The equation for the forces on the lambda variable implicitly assumes that there are only changes in charges and Lennard-Jones paramters. But what about other changes in the force field? 
+In the CHARMM force field, dihedral angles often depend on the ionization state of a side chain.
+}
+
+\textbf{Response and Revision:} 
+In the current CpHMD implementations (by the Brooks, Shen, and Grubm\"{u}ller groups) as well as the implementations of the hybrid MD/MC approach (by Mongan, McCammon and Case and later by the Roitberg group), the bonded part is not scaled and the bonded parameters of one of the protonation states are used.
+This is certainly a limitation that needs to be addressed in the future. 
+We added this clarification.
+
+Page 3, right, below Eq. 2:
+
+\textcolor{red}{
+We note that the force field parameters of some residue types (e.g., carboxylates) may
+depend on the protonation state; however, in the CpHMD [31,33,35,44,45,48]
+as well as the hybrid MD/MC based DpHMD [26,27]
+implementations the bonded parameters 
+are fixed in one of the protonation states.
+This is a limitation that needs to be addressed in the future.
+}
+
+\textbf{Comment 7:}
+
+\textcolor{Blue}{
+MINOR\\
+In the Abstract: "This is a significant drawback, as" --> perhaps change drawback with limitation?
+}
+
+\textbf{Response and Revision:} 
+We thank the reviewer for catching the imprecise wording.
+We made the revision.
+
+Page 1, abstract:
+
+This is a significant 
+\textcolor{red}{limitation}, as ...
+
+\textbf{Comment 8:}
+\textcolor{Blue}{
+Page 5\\
+The writing style is clear but perhaps sounds a bit like spoken words with many "We", "you", "our", etc... For example, "Like all computational chemistry calculations, it is important to know your system as much as possible before any serious". Perhaps change by "it is important to know the system of interest" and generally use a slightly less familiar tone.
+}
+
+\textbf{Response and Revision:} 
+We agree with the reviewer that the writing style is informal. 
+We would not use such a style for articles, 
+but this is a tutorial so we opted to write in a familiar tone. 
+Have said that, we agree with the reviewer's suggestion
+and we revised the sentence and made edits throughout 
+the paper to make the style less informal.
+
+Page 6, left, first paragraph:
+
+\textcolor{red}{
+..., it is important to know the system of interest
+before attempting any simulations.
+}
+
+
+\bigskip
+{\large \bf Reviewer H}
+
+We appreciate the reviewer's favorable view of the tutorial,
+and we address the minor comments below.
+
+\textbf{Comment 1:}
+\textcolor{Blue}{
+There are some inconsistent file names. 
+I noticed two cases: (1) in the lower right code block on page 7, the INP filename should be step2a\_xxx; (2) in the first line on page 9, it should be step1b\_add\_h\_crys\_xwat.inp.
+}
+
+\textbf{Response and Revision:} 
+
+We thank the reviewer for catching the errors.
+We have gone through the tutorial and fixed all inconsistent names; we also added some missing hyperlinks.
+
+\textbf{Comment 2:}
+\textcolor{Blue}{
+There is a weird line in the lower right of page 10 where has a single 'step0.2\_equil.inp' hyperlink line.
+}
+
+\textbf{Response and Revision:} 
+This is now fixed.
+
+\textbf{Comment 3:}
+\textcolor{Blue}{
+There are some broken url links: (1) the url point to GitHub in the first page; (2) the README link in upper left of page 14; (3) the 'cphmd\_parm\_fit.py.' link in upper right of page 18. I checked the authors LaTeX on GitHub and found out the reason is that the authors have a new line for the web url in \url command. Once I delete that, all url links work well.
+}
+
+\textbf{Response and Revision:} 
+We appreciate that the reviewer found out the problem.
+
+
+\textbf{Comment 4:}
+\textcolor{Blue}{
+The url links are not consistent. Some file links are actually folder links. It would be good if the authors can reformat the links.
+}
+
+\textbf{Response and Revision:} 
+We thank the reviewer for pointing out this issue. 
+We have fixed all url links.
+
+
+\bigskip
+
+{\large \bf Reviewer J}
+
+\textbf{Comment 1:}
+\textcolor{Blue}{
+It seems that the instructions provided by the authors on the gitlab repo about patching AMBER20 are not completely correct.
+Specifically, in AMBER20 it seems there is no longer a "src" folder under the \$AMBERHOME path that points to the installation folder, and instead all the source files are left in the source folder. Furthermore, attempting to patch the latest distribution of amber20 results in several errors as follow:
+"Reversed (or previously applied) patch detected! Assume -R?
+X out of X hunks FAILED -- saving rejects to file ./src/cuda/base\_simulationConst.cpp.rej" Pushing throught this errors and attempting to rebuild pmemd resulted in the following cmake error:
+"9 errors detected in the compilation of ./src/pmemd/src/cuda/gti\_cuda.cu.
+CMake Error at pmemd\_cuda\_DPFP\_generated\_gtei\_cuda.cu.o.RELEASE.cmake:278" Nevertheless it seems I was able to run the simulations correctly, despite failing in completing the patching of amber20, so I am not completely sure what happened there, but this issue may affect other readers"
+}
+
+\textbf{Response and Revision:} 
+We appreciate that the reviewer has taken the time to test the code.
+We have updated the gitlab repository to clarify that the src directory that must be patched falls in the Amber source directory rather than \$AMBERHOME.
+
+As to the errors in ``attempting to patch the latest distribution of amber20'', we suggest that they may have to do with applying the CpHMD patch to the Amber20 release version and not the fully patched version. 
+We are raising the issue with the Amber developers and will get it resolved. 
+
+
+\textbf{Comment 2:}
+\textcolor{Blue}{
+The mdin input files generated by cphmd\_prep.sh were actually named with two decimal points, not one as they appear in the tutorial (e.g 3BDC\_chainA\_A\_pH7.50\_prod.mdin instead of 3BDC\_chainA\_A\_pH7.5\_prod.mdin)
+}
+
+\textbf{Response and Revision:} 
+We thank the reviewer for catching this error.
+We updated the script so that the number of decimal 
+points in file names depends on the
+'-dph' flag (default value is 0.5 with 1 decimal point). 
+The files in the GitLab repository were updated accordingly.
+
+\textbf{Comment 3:}
+\textcolor{Blue}{
+Attempting to run the mdin files generated by cphmd\_prep.sh results in a Fortran runtime error because of an Interger format overflow due to the size of the value of the ntwr flag wich is set to 1*10$^{10}$. Reducing the lenght to 1*10$^6$ gets rid of the error,
+ntwr flag which is set to 1*10$^{10}$. Reducing the length to 1*10$^6$ gets rid of the error, although I did not test the effect on the performance.
+}
+
+\textbf{Response and Revision:} 
+We thank the reviewer for catching this error, which is now fixed by making ntwx the same value as ntwr 
+as we do in other running modes. 
+
+
+\textbf{Comment 4:}
+\textcolor{Blue}{
+In addition to the technical issues highlighted before, I think that the tutorial will benefit from a more extended explanaition about which keywords to use and modify in AMBER in order to run CpHMD simulations, rather than exclusively focusing on how to use cphmd$\_$prep.sh to set up the simulations. In my opinion, the reliance on that script makes the whole process a bit too much of a blackbox.
+}
+
+\textbf{Response and Revision:} 
+We thank the reviewer for the suggestion and we added two paragraphs before explaining the shell script cphmd$\_$prep.sh.
+
+Page 13, right, first two paragraphs:
+
+\textcolor{red}{
+\indent Before explaining {cphmd\_prep.sh}, we briefly review the CpHMD specific files and options in Amber here.
+Similar to 3.1 (System Preparation), we first convert the PDB file to the Amber format, cap the terminal groups, add dummy hydrogens to the titratable Asp and Glu residues and change their names to AS2 and GL2.
+Besides the standard Amber force field files, tleap requires two CpHMD specific files for building topology and parameters:
+{frcmod.phmd},
+which specifies the modifications of bonded parameters for AS2 and GL2, 
+and {phmd.lib}, which
+contains the definitions of AS2 and GL2.
+For GBNeck2-CpHMD, set the PBradii to mbondi3 in tleap (see later discussion of modifications). 
+For running CpHMD, an additional file
+{gbneck2$\_$input.parm} is needed, which contains the
+partial charges of the protonated/deprotonated forms of the titratable residues as well as the parameters of the model titration PMFs (see section 7). 
+\\
+\indent
+To run CpHMD, the \textit{pmemd.cuda} command should contain several CpHMD options.
+The option
+\textbf{-phmdparm} reads in 
+the aforementioned CpHMD parameter file {gbneck2\_input.parm}.
+The option \textbf{-phmdin} reads in
+a CpHMD job control file, which specifies various options for CpHMD simulations. 
+We note, except for  
+\textbf{MaskTitrRes(:)} (titratable residue types, e.g., 'AS2','GL2','HIP','CYS','LYS')
+and \textbf{MaskTitrResTypes} (number of titratable residues, e.g., 5), the default settings in the phmdin file should be kept.
+Finally, if specified the option \textbf{-phmdstrt} reads in a CpHMD restart file.
+We should also point out that 
+for CpHMD runs, the Amber mdin files are
+similar to those for the fixed-charge MD using GBNeck2 implicit solvent and Langevin dynamics. 
+The two CpHMD specific flags are \textbf{iphmd} and \textbf{solvph}. 
+For GBNeck2-CpHMD, \textbf{iphmd} should be set to 1 and \textbf{solvph} should be set to the desired pH condition.
+}
+ 
+\textbf{Comment 5:}
+\textcolor{Blue}{
+It will good if the authors could provide additional context to the sentence "If the objective is to predict the pKa values of soluble proteins or their protonation states at a certain pH condition, GBNeck2-CpHMD [41, 42] is the best choice..." in the first paragraph of the second column in page 5.
+}
+
+\textbf{Response and Revision:} 
+
+We revised and expanded the discussion.
+
+Page 6, left, first paragraph: 
+
+\textcolor{red}{
+If the objective is to predict the {\pka} values of soluble proteins 
+or their protonation states at a certain pH condition, we recommend
+the GPU-accelerated GBNeck2-CpHMD in Amber [45], 
+as the {\pka's} converge rapidly and the accuracies 
+for titrating Asp, Glu, His, Cys, and Lys (in solvent-exposed and buried sites) have been validated using a large number of proteins (see references in Table 1).
+If the objective is to investigate the detailed proton-coupled conformational dynamics, proton transfer, protein-ligand binding/unbinding, or transmembrane proteins, we currently recommend 
+the hybrid-solvent CpHMD [33],
+as the accuracy has been extensively validated in terms of
+{\pka} values and description of proton-dependent conformational dynamics
+(see example applications in Table 1),
+although speed is limited due to the use of CPUs.
+We note, a GPU-accelerated all-atom PME CpHMD 
+implementation in Amber22 [51]
+has been recently released by us [52] 
+and holds a promise to offer more accurate description of
+proton-coupled conformational dynamics for heterogeneous systems
+such as protein-ligand complexes and transmembrane proteins.
+}
+
+
+\textbf{Comment 6:}
+\textcolor{Blue}{
+In page 6, when discussing set up of CUDA environment, it may be better to use a generic CUDA version as they do with the AMBER version.
+}
+
+\textbf{Response and Revision:} 
+The CpHMD method uses the same CUDA version as Amber. To clarify this, we revised the related sentence.
+
+%'CUDA 10.1 is the primary CUDA version for running it but early versions from CUDA 7.5 also works' to 
+
+\textcolor{red}{
+A version of CUDA required by Amber needs to be installed.
+}
+
+In summary, we have addressed all the comments from the reviewers and made a thorough revision. As a result, we believe the quality of the tutorial has been significantly improved and the revised version is now ready for publication. 
+
+\closing{Sincerely,}
+
+
+\end{letter}
+\end{document}
