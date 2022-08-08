@@ -1,4 +1,5 @@
-\section{Workflow for implicit-solvent CpHMD in Amber}
+\section{Workflow for implicit-solvent CpHMD in Amber} 
+% - Ruibin
 
 Here we discuss how to run GBNeck2-CpHMD \cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.} simulations in Amber.
 The related files can be found in the GitLab directory 
@@ -21,41 +22,10 @@ The related files can be found in the GitLab directory
 \end{checklist}
 
 To simplify system preparation for GBNeck2-CpHMD simulations,
-we recommend the user to download and install a tool set \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/}{CpHMD-prep}.
-Once installed, the shell script \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh} can be called to prepare the structure and input files for running CpHMD.
-
-Before explaining \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh}, we briefly explain the important CpHMD specific files and options in Amber.
-Similar to CpHMD simulations in CHARMM  (section 3.1), we first convert the PDB file to the Amber format, cap the terminal groups, and change 
-the names of titratable Asp, Glu, and His residues to AS2, GL2, and HIP, respectively. 
-We then add dummy hydrogens to AS2 and GL2.
-Besides the standard Amber force field files, tleap requires two CpHMD specific files for building topology and parameters:
-\href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/frcmod.phmd}{frcmod.phmd},
-which specifies the modifications of bonded parameters for AS2 and GL2, 
-and \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/phmd.lib}{phmd.lib}, which
-contains the definitions of AS2 and GL2.
-For GBNeck2-CpHMD, set the PBradii to mbondi3 in tleap (see later discussion of modifications). 
-For running CpHMD, an additional file
-\href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/gbneck2_input.parm}{gbneck2$\_$input.parm} is needed, which contains the
-partial charges and van der Waals energy flags of the protonated/deprotonated forms of the titratable residues as well as the parameters of the model titration PMFs (see section 7). 
-
-To run CpHMD, the \textit{pmemd.cuda} command should contain several CpHMD options.
-The option
-\textbf{-phmdparm} reads in 
-the aforementioned CpHMD parameter file \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/blob/master/Files/gbneck2_input.parm}{gbneck2\_input.parm}.
-The option \textbf{-phmdin} reads in
-a CpHMD job control file, which specifies various options for CpHMD simulations. 
-We note, except for  
-\textbf{MaskTitrRes(:)} (titratable residue types, e.g., 'AS2','GL2','HIP','CYS','LYS')
-and \textbf{MaskTitrResTypes} (number of titratable residues, e.g., 5), the default settings in the phmdin file should be kept.
-Finally, if specified the option \textbf{-phmdstrt} reads in a CpHMD restart file.
-We should also point out that 
-for CpHMD runs, the Amber mdin files are
-similar to those for the fixed-charge MD using GBNeck2 implicit solvent and Langevin dynamics. 
-The two CpHMD specific flags are \textbf{iphmd} and \textbf{solvph}. 
-For GBNeck2-CpHMD, \textbf{iphmd} should be set to 1 and \textbf{solvph} should be set to the desired pH condition. 
-
-Now we explain the shell script
-\href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh}.
+we recommend the user to download and install the tool set \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/}{CpHMD-prep}.
+Once installed, the shell script \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh} can be called to prepare the structure and input files.
+% In the near future, a web server will be provided for this task.
+%for preparing the Amber GBNeck2-CpHMD inputs and instructions to run related CpHMD simulations by one line bash command via the 'CpHMD\_Prepare.sh' script. 
 \begin{lstlisting}
 cphmd_prep.sh 
 [-pdb|--pdbid] | [-fil|--filename]
@@ -73,28 +43,26 @@ cphmd_prep.sh
 \end{lstlisting}
 %[-tes|--test]
 %[-ot|--outfiletype] 
-If specified, the option
- \textbf{-pdb|--pdbid} reads in a PDB ID and downloads the corresponding structure from RCSB.
-If no PDB ID is given, the option
-\textbf{-fil|--filename} reads in a PDB file.
-The option
-\textbf{-cha|--chainid} specifies the chain ID to include in simulations (default 'A').
-If specified, the option \textbf{-mod|--modelid} reads in a rotamer model ID (e.g., A or B) in the PDB file.
-The following options are related to the simulation:
-\textbf{-con|--conc} specifies the ionic strength in M (default 0.15); 
-\textbf{-tim|--time} specifies the simulation length in ns for each pH condition (default 10); 
-\textbf{-tem|--temperature} specifies the simulation temperature in K (default 300); 
-\textbf{-phl|--phlow} specifies the lowest pH (default 6.5);
-\textbf{-phu|--phup} specifies the highest pH (default 9.0);
-\textbf{-phi|--pHintvl} specifies the pH interval for calculating the individual
+The options of 
+\href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh}
+are explained here.
+ \textbf{-pdb|--pdbid}: the PDB ID of the protein used in CpHMD calculations where the corresponding PDB file is downloaded from RCSB; 
+\textbf{-fil|--filename}: the PDB file or path used in CpHMD calculations; 
+\textbf{-cha|--chainid}: chain IDs to include in simulations with default 'A'; 
+\textbf{-mod|--modelid}: the rotamer model ID in the PDB file;
+\textbf{-con|--conc}: ionic strength in M with the default 0.15; 
+\textbf{-tim|--time}: simulation length in ns for each pH condition (default 10); 
+\textbf{-tem|--temperature}: simulation temperature in K (default 300); 
+\textbf{-phl|--phlow}: lowest pH (default 6.5);
+\textbf{-phu|--phup}: highest pH (default 9.0);
+\textbf{-phi|--pHintvl}: pH interval for calculating the individual
 simulation pH conditions between phlow and phup; 
-\textbf{-res|--restype} specifies the amino acid residue types allowed to be titratable (default 'Asp Glu His Cys Lys'); and
-\textbf{-rm|--runmode} specifies the type of simulation ('async' for asynchronous pH replica exchange, 
-'rex' for synchronous pH replica exchange,
-and 'ind' for independent pH simulations).
-Finally, 
-\textbf{-t|--test} offers a test option ('t' means temporary files will be kept for checking) and 
-\textbf{-h|--help} displays the usage and options.
+\textbf{-res|--restype}: amino acid residue types allowed to be titratable (default 'Asp Glu His Cys Lys'); 
+\textbf{-rm|--runmode}: type of simulation, i.e., 'async' for asynchronous pH replica exchange, 
+'rex' for traditional synchronous pH replica exchange,
+and 'ind' for independent pH simulations; 
+\textbf{-t|--test}: if 'T', temporary files are kept for checking;
+\textbf{-h|--help}, to display the usage and options.
 
 \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-prep/-/tree/master/cphmd_tools/cphmd_prep.sh}{cphmd\_prep.sh}
 accepts either a PDB ID
@@ -151,8 +119,13 @@ We can also specify multiple chains.
 For example, if we want to include both chain A and chain B, 
 the command option -cha 'A B' can be used, 
 and the file names will start with 5U8L\_chainAB. 
-All files in the folder `5U8L' are also zipped as 
+All files in the folder`5U8L' are also zipped as 
 \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd_Amber/gphmd_kinase_aphrex}{cphmd\_inputs.zip}.
+
+
+% As implied in the cphmd\_prep.log file, the default mode for running a GBNeck2-CpHMD simulation is asynchronous pH replica exchange, which can be changed to independent pH or classical pH replica exchange modes through specifying the -rm|--runmode flag from 'async' (default) to 'ind' or 'reex'. 
+% The README file mentioned in the job\_log file which has instructions of how to run a CpHMD simulation with the provided files. 
+% The whole files are in the \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd\_Amber/gphmd\_snase}{gphmd\_snase} folder of the \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial}{cphmd-tutorial} GitLab repository.
 
 
 \paragraph{Example 2. Predict the {\pka's} of the protein Snase given a PDB file.}
@@ -177,6 +150,7 @@ there are 14 extra Amber input files due to the additional pH conditions.
 All related files can be found here \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd_Amber/gphmd_snase_aphrex/3BDC}{3BDC}. 
 
 Several additional files are generated by cphmd\_prep.sh.
+%used in production runs depending on running mode specified by the user. 
 \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd_Amber/gphmd_kinase_aphrex/5U8L/apHREX.py}{apHREX.py}
 is a Python script for running asynchronous pH replica exchange simulations if -run is not specified or specified as async. 
 The related file
@@ -224,6 +198,17 @@ contains the printed energies, and
 
 
 \paragraph{Equilibration}
+% \begin{checklist}{Files needed for equilibration and production}
+% %\textbf{}
+% \begin{itemize}
+% \item coordinates and topology files (\*.psf, \*.crd)
+% %\item system CRD file 
+% \item periodic boundary file (\*.pbc)
+% \item  restart file from equilibration (\*.rst)
+% \item production input prod\_hphrex.inp
+% \item replica exchange file rep.cmd
+% \end{itemize}
+% \end{checklist}
 Following minimization, we perform a four-stage equilibration
 to relax the protein structure at physiological pH 7.5 (or the crystallization pH).
 Note, for implicit-solvent simulations heating is not required. 
@@ -294,17 +279,17 @@ is invoked with the following command:
 \begin{lstlisting}
 $ export name='3BDC_chainA_A'
 $ $AMBERHOME/bin/pmemd.cuda -O
-  -i ${name}_pH7.5_prod.mdin
+  -i ${name}_pH7.50_prod.mdin
   -c ${name}_equil4.rst7 -p ${name}.parm7
-  -r ${name}_pH7.5_prod1.rst7
-  -o ${name}_pH7.5_prod1.out
-  -x ${name}_pH7.5_prod1.nc
+  -r ${name}_pH7.50_prod1.rst7
+  -o ${name}_pH7.50_prod1.out
+  -x ${name}_pH7.50_prod1.nc
   -phmdin ${name}.phmdin
   -phmdparm gbneck2_input.parm
   -phmdstrt ${name}_equil4.phmdrst
-  -phmdout ${name}_pH7.5_prod1.lambda
+  -phmdout ${name}_pH7.50_prod1.lambda
   -phmdrestrt ${name}_pH7.5_prod1.phmdrst
-  -inf pH7.5.mdinfo
+  -inf pH7.50.mdinfo
 \end{lstlisting}
 The restart files generated by equilibration step 4 are used as starting files for the production run. No reference file is needed. 
 Along with *.out, *.rst7, *.nc (trajectory), 
@@ -315,7 +300,7 @@ but we can also run on CPUs with pmemd.MPI.
 All input files for this example can be found in \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd_Amber/gphmd_snase_phind}{gphmd\_snase\_phind}.
 
 pH replica-exchange simulations usually converge
-much faster and thus require less simulation time than independent pH simulations \cite{Wallace_Shen_2011_J.Chem.TheoryComput.,Harris_Shen_2019_J.Chem.Inf.Model.,Harris_Shen_2020_J.Chem.TheoryComput.}. 
+much faster and thus require less simulation time than single pH simulations \cite{Wallace_Shen_2011_J.Chem.TheoryComput.,Harris_Shen_2019_J.Chem.Inf.Model.,Harris_Shen_2020_J.Chem.TheoryComput.}. 
 The traditional replica-exchange algorithm
 allows each replica to run in parallel and 
 data exchange is synchronized.
@@ -326,6 +311,8 @@ The commands in the group file are quite similar to those for
 the independent pH runs. 
 The input files can be generated using 
 \textbf{cphmd\_prep.sh} with the option \textbf{-run rex}.
+% For the Snase example, if we add '-run rex' to the command and change -pmax 12.0 to -pmax 12.5, 
+% we will have a file named cphmd.groupfile in the 3BDC folder. 
 For example,
 \begin{lstlisting}
 mpirun -np 64 
@@ -362,6 +349,10 @@ $ python apHREX.py 2000
 Output files, including the standard Amber outputs, lambda files, and trajectory files, are concatenated on the fly according to the pH conditions instead of replicas in the pHREX method. 
 These files are stored in the 3BDC\_chainA\_A\_cphmd subdirectory.
 The input files for this example can be found in \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/gphmd_Amber/gphmd_snase_aphrex}{gphmd\_snase\_aphrex}.
+% Here we can describe a few different styles of production run with CpHMD. 
+% this section can be broken down into three sections
+%   1.) Single-pH runs with CpHMD Simulations in AMBER
+%   2.) Async-pHREX with CpHMD simulations in AMBER
 
 \paragraph{Other relevant settings}
 For optimum performance in {\pka} prediction,

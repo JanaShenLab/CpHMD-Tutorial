@@ -1,32 +1,28 @@
 \section{Prerequisites} % - Ruibin
 CpHMD is a specialized MD technique, so the user should have some familiarity with MD simulations and especially with the Amber or CHARMM packages. 
-Users having experience with other MD engines, such as GROMACS
+Users with experience with other MD engines, such as Gromacs
 \cite{Abraham_Lindahl_2015_SoftwareX}, NAMD\cite{Phillips_Tajkhorshid_2020_J.Chem.Phys.}, 
 or OpenMM
 \cite{Eastman_Pande_2017_PLoSComput.Biol.} 
 are encouraged to go through the introductory tutorials for Amber or CHARMM to get started. 
-Before running a CpHMD simulation, it is important to know the research objective. 
-If the objective is to predict the {\pka} values of soluble proteins 
-or their protonation states at a certain pH condition, we recommend
-the GPU-accelerated GBNeck2-CpHMD in Amber
-\cite{Harris_Shen_2019_J.Chem.Inf.Model.}, 
-as the {\pka's} converge rapidly and the accuracies 
-for titrating Asp, Glu, His, Cys, and Lys (in solvent-exposed and buried sites) have been validated using a large number of proteins (see references in Table~\ref{Table:applications}).
-If the objective is to investigate the detailed proton-coupled conformational dynamics, proton transfer, protein-ligand binding/unbinding, or transmembrane proteins, we currently recommend 
-the hybrid-solvent CpHMD  \cite{Wallace_Shen_2011_J.Chem.TheoryComput.},
-as the accuracy has been extensively validated in terms of
-{\pka} values and description of proton-dependent conformational dynamics
-(see example applications in Table~\ref{Table:applications}),
-although speed is limited due to the use of CPUs.
+Before running a CpHMD simulation, it is important to know your research objective. 
+If the objective is to predict the {\pka} values of soluble proteins or their protonation states at a certain pH condition, GBNeck2-CpHMD 
+\cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}
+is the best choice and Amber \cite{Case_Kollman_2018}
+experience is required. 
+If the objective is to investigate the detailed proton-coupled conformational dynamics, ion transfer, protein-ligand binding/unbinding,
+or transmembrane proteins, then 
+the hybrid-solvent CpHMD  \cite{Wallace_Shen_2011_J.Chem.TheoryComput.,Huang_Shen_2016_Nat.Commun.} 
+or the all-atom PME CpHMD \cite{Huang_Shen_2016_J.Chem.TheoryComput.}
+in CHARMM
+\cite{Brooks_Karplus_2009_J.Comput.Chem.}
+should be used.
 We note, a GPU-accelerated all-atom PME CpHMD 
 implementation in Amber22 \cite{Case_Kollman_2022}
-has been recently released by us \cite{Harris_Shen_Submitted}
-and holds a promise to offer more accurate description of
-proton-coupled conformational dynamics for heterogeneous systems
-such as protein-ligand complexes and transmembrane proteins.
-Like all computational chemistry calculations, it is important to know the system of interest before attempting any simulations. 
-With such knowledge, one an properly choose the salt concentration, temperature, pH range, and titratable residue types to use in CpHMD. Also, the research objective dictates the simulation length. 
-For example, to predict protonation states, simulation can be run until the unprotonated fractions at all pH are converged, typically 10-50 ns per replica. If however, a large conformational transition is of interest, the simulation should be much longer. 
+has been recently released \cite{Harris_Shen_Submitted}.
+Like all computational chemistry calculations, it is important to know the system of interest
+before attempting any simulations. 
+With such knowledge, we can decide what salt concentration, temperature, pH range, and titratable residue types to use in CpHMD. Also, the research objective dictates the simulation length. For example, to predict protonation states, simulation can be run until the unprotonated fractions at all pH are converged, typically 10-50 ns per replica. If however, a large conformational transition is of interest, the simulation should be much longer. 
 
 \subsection{Background knowledge}
 Knowledge of classical MD is required to understand what we can and cannot achieve through a MD simulation. 
@@ -48,7 +44,7 @@ The user can use any data visualisation tool(s), but matplotlib in Python and Ju
 For GBNeck2-CpHMD, Amber16 is the minimum version. 
 Requirements for installing Amber can be found in the \href{https://ambermd.org/Installation.php}{Amber website}. 
 For the GPU version (pmemd.cuda), a Nvidia GPU card with at least compute compatibility sm3.0 should be installed with the latest driver. 
-A version of CUDA required by Amber needs to be installed. 
+CUDA 10.1 is the primary CUDA version for running it but early versions from CUDA 7.5 also works. 
 After successfully installing CUDA, it is important to set three environmental variables in Linux. 
 \textbf{CUDA\_HOME} and \textbf{LD\_LIBRARY\_PATH} must point to the directories where the desired CUDA version is installed. 
 We also need to specify \textbf{CUDA\_VISIBLE\_DEVICES} to GPU device indices. For example, 
