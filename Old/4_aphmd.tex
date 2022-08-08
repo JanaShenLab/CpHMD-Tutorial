@@ -1,0 +1,80 @@
+\section{Workflow for all-atom PME CpHMD in CHARMM} 
+% - Yandong
+Minor modifications to the workflow for 
+hybrid-solvent CpHMD are needed 
+to set up and run all-atom PME CpHMD 
+simulations in CHARMM \cite{Huang_Shen_2016_J.Chem.TheoryComput.}. 
+The example inputs for simulations of BBL are downloadable from  \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/ephmd_charmm/}{ephmd\_charmm}.
+To maintain charge neutrality during the
+all-atom PME CpHMD simulation, 
+titratable water molecules  
+\cite{Chen_Shen_2013_Biophys.J.}
+(or co-ions \cite{Wallace_Shen_2012_J.Chem.Phys.} in an earlier version) should be added.
+Specifically, each acidic (Asp or Glu) or 
+basic residue (His or Lys) is 
+coupled with one titratable water that can convert to a hydroxide (TIPU) or hydronium (TIPP). Details are explained in Ref \cite{Chen_Shen_2013_Biophys.J.}.
+Together with salt ions, titratable water molecules are placed in the water box using the input script
+\href{https://gitlab.com/shenlab-amber-cphmd/cphmd-tutorial/-/tree/main/ephmd_charmm/bbl_sys_prep/}
+{step3\_add\_ions\_titr.inp}.
+
+To run an all-atom PME CpHMD simulation, make sure
+the command GBSW is NOT invoked before calling PHMD.
+The additional options need to be added in the PHMD command to specify the residue names of titratable water (TIPU and TIPP) and the total number as well as residue IDs of the coupled pairs.
+For example, in the BBL simulation, 3 Asp, 3 Glu, and 2 His
+are titratable, and they are coupled to 8 titratable water molecules. 
+%
+\begin{lstlisting}
+PHMD PAR 23 WRI 25 PH 7.0 NPRI 5000 PHFRQ 5 
+    MASS 10.0 BETA 5.0 TEMP 298 LAM -
+    sele resn ASP .or. resn GLU .or. TIPU .or. 
+    resn HSP .or. TIPP end - 
+    qcouple 8 - 
+    resi 4  resc 4789 -
+    resi 16 resc 4790 -
+    resi 20 resc 4791 -
+    resi 36 resc 4792 -
+    resi 37 resc 4793 -
+    resi 39 resc 4794 -
+    resi 17 resc 4771 -
+    resi 41 resc 4772 
+\end{lstlisting}
+%
+    %-If the user does not 
+ %    -want the default, can he/she set it 
+Here resn TIPU and TIPP declare the two types of titratable water. 
+The option qcouple 8 specifies
+a total number of 8 coupled pairs. 
+Following qcouple, residue IDs for the titratable group 
+(e.g., resi 4) and co-titrating water (e.g., resc 4789) are listed. 
+Note, all co-titrating pairs need to be specified manually.
+
+% Finally, the calculated \pka's are 
+% corrected with the following formula 
+% to account for the finite-size error 
+% \cite{Huang_Shen_2016_J.Chem.TheoryComput.}.
+
+% \begin{eqnarray}
+% \label{eq:pka_corr}
+% \Delta\Delta{G}^{\rm offset} &=&
+% \frac{2 \pi}{3} \kappa \gamma^{\rm solv} Q 
+% \left(\frac{N}{V}
+% - \rho^{\rm pure} \right) \\
+% \Delta pK_a^{\rm corr} &=& \pm \frac{\Delta\Delta{G}^{\rm offset}}{ln(10)RT},
+% \end{eqnarray}
+% where $\gamma^{\rm solv}$ is 0.764 e$\cdot$ {\AA$^2$} 
+% for TIP3P water model. 
+% $\kappa$ is the electrostatic constant, 
+% which is 332.0 kcal 
+% $\cdot$ {\AA} $\cdot$ mol$^{-1}$e$^{-2}$. 
+% The solvent number density $\rho^{\rm pure}$ is 
+% 0.0333679 {\AA}$^3$ for water at ambient temperature 
+% and pressure. 
+% Q is -1 for acidic groups and +1 for basic groups. 
+% The negative sign is for acid groups and positive sign 
+% is for basic groups.
+% Thus, $\Delta$\pka$^{\rm corr}$ is negative for both 
+% acidic and basic groups. 
+% N is the number of solvent and V is the volume of the box 
+% measured at equilibrium, which can be approximated 
+% with the initial volume $V^{\rm init}$ times 0.93. $V^{\rm est} = L^3$ for a cubic box and $V^{\rm est} = 0.77L^3$ for a truncated octahedron box, where L denotes the cubic 
+% box size. R is the Boltzmann constant and T is the temperature.
