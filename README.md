@@ -1,6 +1,7 @@
 # CpHMD-Tutorial: A Guide to the Continuous Constant pH Molecular Dynamics Methods in Amber and CHARMM
 
-## Methods covered in this tutorial [v1.0]
+## Methods covered in this tutorial v[1.0]
+
   - CPU Hybrid-solvent CpHMD in CHARMM: Wallace JA, Shen J. Continuous Constant pH Molecular Dynamics in Explicit Solvent with pH-Based Replica Exchange. J. Chem. Theory Comput. 7: 2617–2629, 2011. https://doi.org/10.1021/ct200146j
   
   - CPU Membrane-enabled Hybrid-solvent CpHMD in CHARMM: Huang YD, Chen W, Dotson DL, Beckstein O, and Shen J. Mechanism of pH-dependent activation of the sodium-proton antiporter NhaA. Nat Commun 7: 12940, 2016. https://doi.org/10.1038/ncomms12940

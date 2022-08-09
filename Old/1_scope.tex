@@ -1,0 +1,24 @@
+\subsection{Scope} % - Ruibin 
+This tutorial mainly covers two CpHMD methods that
+have been extensively validated and applied to various real-life problems:
+1) the hybrid-solvent CpHMD \cite{Wallace_Shen_2011_J.Chem.TheoryComput.}
+in CHARMM \cite{Brooks_Karplus_2009_J.Comput.Chem.}
+and
+2) the GBNeck2 implicit-solvent CpHMD
+\cite{Huang_Shen_2018_J.Chem.Inf.Model.,Harris_Shen_2019_J.Chem.Inf.Model.}
+in Amber \cite{Case_Kollman_2018}. Currently, fully patched Amber 18 and 20 released versions are supported. GBNeck2-CpHMD patches to them can be downloaded from our \href{https://gitlab.com/shenlab-amber-cphmd/cphmd-patches}{cphmd-patches} repository. Details about how to apply them are described on that repository page.
+The CHARMM hybrid-solvent CpHMD currently supports CPUs only, 
+but the Amber GBNeck2-CpHMD supports both CPU or GPU computing.
+We strongly recommend running the CpHMD simulations
+via the pH replica-exchange protocol to significantly accelerate convergence of \pka's and conformational sampling; however, if desired, a single pH 
+simulation or a set of independent pH simulations can also 
+be conducted.
+
+In addition to the above two methods, we will briefly
+discuss the PME all-atom CpHMD method implemented in
+CHARMM for CPU computing \cite{Huang_Shen_2016_J.Chem.TheoryComput.}
+and in Amber for GPU computing (Harris, Liu, and Shen, unpublished data). 
+We note, this tutorial does not cover the GBSW implicit-solvent CpHMD method in CHARMM 
+\cite{Lee_Brooks_2004_Proteins,Khandogin_Brooks_2005_Biophys.J.,Khandogin_Brooks_2006_Biochemistry,Arthur_Brooks_2016_J.Comput.Chem.a}, which is available for both CPU and GPU computing.
+The GBSW-CpHMD method with the temperature replica-exchange protocol has been extensively validated for protein \pka\ 
+predictions and pH-dependent conformational dynamics.
